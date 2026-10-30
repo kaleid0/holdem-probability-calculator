@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "draft": {
+    "hero": [0, 5],
+    "board": [32, 36, 40, 44, 48],
+    "boardSize": 5,
+    "deadCards": [],
+    "opponents": [
+      { "kind": "exact", "cards": [9, 14] },
+      { "kind": "exact", "cards": [19, 21] }
+    ],
+    "pot": "150",
+    "call": "50",
+    "futureBetting": false,
+    "samples": 10000,
+    "seed": 42,
+    "strategyId": "pot-odds"
+  }
+}
