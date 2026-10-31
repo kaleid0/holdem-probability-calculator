@@ -22,10 +22,31 @@ import type {
   TaskCreated,
 } from "./api/client";
 import s from "./App.module.css";
+import Comparison from "./Comparison";
+import LiveTable from "./LiveTable";
+import TableSettings from "./TableSettings";
+import AnalysisSettings from "./AnalysisSettings";
+import OpponentSettings from "./OpponentSettings";
 
 type CardTarget =
   | { group: "hero" | "board" | "dead"; index: number }
   | { group: "opponent"; index: number; player: number };
+function currentSuitForTarget(draft: Draft, target: CardTarget) {
+  const value =
+    target.group === "hero"
+      ? draft.hero[target.index]
+      : target.group === "board"
+        ? draft.board[target.index]
+        : target.group === "opponent"
+          ? (() => {
+              const opponent = draft.opponents[target.player];
+              return opponent.kind === "exact"
+                ? opponent.cards[target.index]
+                : null;
+            })()
+          : null;
+  return value === null || value === undefined ? 0 : value % 4;
+}
 const statusText = {
   queued: "排队等待计算",
   running: "正在模拟牌局",
@@ -37,7 +58,7 @@ const statusText = {
 };
 const percent = (value: number) => `${(value * 100).toFixed(2)}%`;
 
-function Card({
+export function Card({
   value,
   onClick,
   onRemove,
@@ -59,6 +80,7 @@ function Card({
           value === null ? `选择${label}` : `更换${label}：${cardLabel(value)}`
         }
         onClick={onClick}
+        disabled={!onClick}
       >
         {value === null ? (
           <>
@@ -90,7 +112,7 @@ function Card({
   );
 }
 
-function CardPicker({
+export function CardPicker({
   draft,
   target,
   onSelect,
@@ -102,6 +124,9 @@ function CardPicker({
   onClose: () => void;
 }) {
   const dialog = useRef<HTMLDivElement>(null);
+  const [activeSuit, setActiveSuit] = useState(
+    currentSuitForTarget(draft, target),
+  );
   const originalFocus = useRef(document.activeElement);
   const current =
     target.group === "hero"
@@ -168,7 +193,10 @@ function CardPicker({
         <div className={s.pickerHeading}>
           <div>
             <span className={s.eyebrow}>THE DECK · 52 CARDS</span>
-            <h2 id="picker-title">{title}</h2>
+            <h2 id="picker-title">
+              {title}
+              {target.group !== "dead" ? ` · 第 ${target.index + 1} 张` : ""}
+            </h2>
           </div>
           <button
             className={s.closeButton}
@@ -182,44 +210,54 @@ function CardPicker({
           已使用的牌不可重复选择。
           {target.group === "dead"
             ? "可连续选择，点击已选死牌可取消。"
-            : "选择一张牌后返回牌桌。"}
+            : "选择牌面后自动进入下一空位，或返回牌桌。"}
         </p>
-        <div className={s.deck}>
+        <div className={s.suitTabs} role="tablist" aria-label="选择花色">
           {suits.map((suit, suitIndex) => (
-            <div className={s.suitRow} key={suit}>
-              <span
-                className={`${s.suitLabel} ${suitIndex % 2 === 1 ? s.red : ""}`}
-                aria-label={suitNames[suitIndex]}
-              >
-                {suit}
-              </span>
-              <div className={s.rankRow}>
-                {Array.from(ranks).map((rank, rankIndex) => {
-                  const value = rankIndex * 4 + suitIndex;
-                  const selected =
-                    target.group === "dead"
-                      ? draft.deadCards.includes(value)
-                      : current === value;
-                  return (
-                    <button
-                      key={value}
-                      className={`${s.deckCard} ${suitIndex % 2 === 1 ? s.red : ""} ${selected ? s.selectedCard : ""}`}
-                      disabled={occupied.has(value) && !selected}
-                      onClick={() => onSelect(value)}
-                      aria-label={cardLabel(value)}
-                      aria-pressed={selected}
-                    >
-                      <span>{rank}</span>
-                      <small>{suit}</small>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <button
+              key={suit}
+              type="button"
+              role="tab"
+              aria-selected={activeSuit === suitIndex}
+              className={`${s.suitTab} ${suitIndex % 2 === 1 ? s.red : ""} ${activeSuit === suitIndex ? s.activeSuit : ""}`}
+              onClick={() => setActiveSuit(suitIndex)}
+            >
+              <span>{suit}</span>
+              {suitNames[suitIndex]}
+            </button>
           ))}
         </div>
+        <div className={s.deck}>
+          <div
+            className={s.rankScroller}
+            aria-label={`${suitNames[activeSuit]}牌号`}
+          >
+            <div className={s.rankRow}>
+              {Array.from(ranks).map((rank, rankIndex) => {
+                const value = rankIndex * 4 + activeSuit;
+                const selected =
+                  target.group === "dead"
+                    ? draft.deadCards.includes(value)
+                    : current === value;
+                return (
+                  <button
+                    key={value}
+                    className={`${s.deckCard} ${activeSuit % 2 === 1 ? s.red : ""} ${selected ? s.selectedCard : ""}`}
+                    disabled={occupied.has(value) && !selected}
+                    onClick={() => onSelect(value)}
+                    aria-label={cardLabel(value)}
+                    aria-pressed={selected}
+                  >
+                    <span>{rank}</span>
+                    <small>{suits[activeSuit]}</small>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
         <div className={s.pickerFooter}>
-          <span>♠ ♣ 为黑色花色 · ♥ ♦ 为红色花色</span>
+          <span>选择花色，再点选牌号 · 已使用的牌会自动禁用</span>
           <button className={s.textButton} onClick={onClose}>
             完成选牌 →
           </button>
@@ -258,7 +296,7 @@ function Results({
           >
             <div>
               <span>我的底池权益</span>
-              <strong>
+              <strong aria-label="底池权益百分比">
                 {(equity * 100).toFixed(2)}
                 <small>%</small>
               </strong>
@@ -346,7 +384,7 @@ function Results({
       <div className={s.evBox}>
         <div>
           <span>
-            跟注期望收益 <b>EV</b>
+            跟注参考收益 <b>EV</b>
           </span>
           <strong
             className={
@@ -364,7 +402,47 @@ function Results({
             "此场景不输出行动建议，请结合计算假设理解结果。"}
         </p>
       </div>
-      <details className={s.assumptions} open>
+      {(result.signals?.length ?? 0) > 0 && (
+        <div className={s.signals}>
+          <h3>规则触发依据</h3>
+          <ul>
+            {result.signals?.map((signal, index) => (
+              <li key={index}>{signal}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {(result.candidates?.length ?? 0) > 0 && (
+        <div className={s.candidates}>
+          <h3>候选动作 · 同一摊牌假设</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>动作</th>
+                <th>追加筹码</th>
+                <th>参考 EV</th>
+              </tr>
+            </thead>
+            <tbody>
+              {result.candidates?.map((item) => (
+                <tr key={item.action}>
+                  <td>{item.action === "fold" ? "弃牌" : "跟注"}</td>
+                  <td>{item.amount ?? "—"}</td>
+                  <td>
+                    {item.ev === null || item.ev === undefined
+                      ? "未提供"
+                      : item.ev.toFixed(2)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className={s.helper}>
+            单位：筹码；基准：此刻弃牌。跟注参考值不包含后续投入。
+          </p>
+        </div>
+      )}
+      <details className={s.assumptions}>
         <summary>
           计算假设与适用条件 <span>＋</span>
         </summary>
@@ -375,7 +453,8 @@ function Results({
         </ul>
         <p>
           策略：{result.strategy.name} · v{result.strategy.version}
-          。抽样误差不包含对手范围假设带来的不确定性。
+          。模型版本：{result.model_version}。抽样误差不包含范围假设的不确定性。
+          配置：{JSON.stringify(result.strategy_config ?? {})}
         </p>
       </details>
     </>
@@ -383,7 +462,8 @@ function Results({
 }
 
 export default function App() {
-  const { draft, dispatch } = useScenario();
+  const [mode, setMode] = useState<"snapshot" | "live">("snapshot");
+  const { draft, dispatch, game } = useScenario();
   const [picker, setPicker] = useState<CardTarget | null>(null);
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [connection, setConnection] = useState<
@@ -393,14 +473,17 @@ export default function App() {
   const [task, setTask] = useState<AnalysisTask | null>(null);
   const [completed, setCompleted] = useState<{
     result: AnalysisResult;
+    outcomes: NonNullable<AnalysisTask["outcomes"]>;
     input: string;
   } | null>(null);
+  const [activeStrategy, setActiveStrategy] = useState("pot-odds");
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
   const [networkError, setNetworkError] = useState("");
   const submittedInput = useRef("");
   const fileInput = useRef<HTMLInputElement>(null);
+  const resultPanel = useRef<HTMLElement>(null);
   const fingerprint = JSON.stringify(toRequest(draft));
   const busy = submitting || activeTask(task?.status);
   const patch = (value: Partial<Draft>) => {
@@ -441,8 +524,14 @@ export default function App() {
         setTask(next);
         setNetworkError("");
         setConnection("online");
-        if (next.status === "succeeded" && next.result)
-          setCompleted({ result: next.result, input: submittedInput.current });
+        if (!activeTask(next.status) && next.result) {
+          setCompleted({
+            result: next.result,
+            outcomes: next.outcomes ?? [],
+            input: submittedInput.current,
+          });
+          setActiveStrategy(next.result.strategy.id);
+        }
         if (activeTask(next.status)) timer = setTimeout(poll, 450);
       } catch (error) {
         if (controller.signal.aborted || stopped) return;
@@ -516,15 +605,43 @@ export default function App() {
         if (i !== player || o.kind !== "exact") return o;
         const cards = [...o.cards] as [number | null, number | null];
         cards[cardIndex] = value;
-        return { kind: "exact" as const, cards };
+        return { ...o, cards };
       });
       patch({ opponents });
     }
-    setPicker(null);
+    // Keep the picker open for the next empty slot: this makes entering a
+    // two-card hand a single uninterrupted flow on touch screens.
+    if (
+      picker.group === "hero" &&
+      picker.index === 0 &&
+      draft.hero[1] === null
+    ) {
+      setPicker({ group: "hero", index: 1 });
+    } else if (
+      picker.group === "board" &&
+      picker.index < draft.boardSize - 1 &&
+      draft.board[picker.index + 1] == null
+    ) {
+      setPicker({ group: "board", index: picker.index + 1 });
+    } else if (picker.group === "opponent" && picker.index === 0) {
+      const opponent = draft.opponents[picker.player];
+      if (opponent.kind === "exact" && opponent.cards[1] === null) {
+        setPicker({ group: "opponent", player: picker.player, index: 1 });
+      } else {
+        setPicker(null);
+      }
+    } else {
+      setPicker(null);
+    }
   }
 
-  async function calculate() {
-    const validation = validateDraft(draft);
+  async function calculate(scene: Draft = draft) {
+    if (busy) return;
+    if (game?.folded[0]) {
+      setErrors(["你已弃牌，本手不再参与底池权益分析。"]);
+      return;
+    }
+    const validation = validateDraft(scene);
     if (validation.length) {
       setErrors(validation);
       return;
@@ -533,20 +650,28 @@ export default function App() {
     setErrors([]);
     setMessage("");
     setNetworkError("");
-    submittedInput.current = fingerprint;
+    submittedInput.current = JSON.stringify(toRequest(scene));
+    requestAnimationFrame(() =>
+      resultPanel.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      }),
+    );
     try {
       const created = await request<TaskCreated>("/api/v1/analyses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(toRequest(draft)),
+        body: JSON.stringify(toRequest(scene)),
       });
       setTask({
         ...created,
         progress: 0,
         completed_samples: 0,
-        total_samples: draft.samples,
+        total_samples: scene.samples,
         result: null,
         error: null,
+        completion: "none",
+        outcomes: [],
       });
     } catch (error) {
       setErrors([
@@ -575,7 +700,7 @@ export default function App() {
 
   function exportScene() {
     const url = URL.createObjectURL(
-      new Blob([JSON.stringify({ schemaVersion: 1, draft }, null, 2)], {
+      new Blob([JSON.stringify({ schemaVersion: 3, draft }, null, 2)], {
         type: "application/json",
       }),
     );
@@ -610,7 +735,11 @@ export default function App() {
   function reset(example: boolean) {
     dispatch({
       type: "replace",
-      draft: example ? exampleDraft() : emptyDraft(),
+      draft: {
+        ...(example ? exampleDraft() : emptyDraft()),
+        table: draft.table,
+        opponents: draft.opponents.map(() => ({ kind: "random" as const })),
+      },
     });
     setErrors([]);
     setMessage(
@@ -628,7 +757,7 @@ export default function App() {
           </span>
         </a>
         <div className={s.headerRight}>
-          <span className={s.version}>HOLD’EM / v0.1</span>
+          <span className={s.version}>HOLD’EM / v0.2</span>
           <button
             className={s.connection}
             onClick={() => {
@@ -657,31 +786,57 @@ export default function App() {
       <main className={s.main}>
         <section className={s.intro}>
           <div>
-            <p className={s.eyebrow}>TEXAS HOLD’EM · EQUITY & ODDS</p>
             <h1>
-              每一次决策，<span>都有依据。</span>
+              还原牌局，<span>看清胜算。</span>
             </h1>
-            <p className={s.introText}>
-              还原你的牌局，计算摊牌权益与跟注成本。
-            </p>
-          </div>
-          <div className={s.introNote}>
-            <span>01 — 配置牌局</span>
-            <span>02 — 选择策略</span>
-            <span>03 — 理解结果</span>
           </div>
         </section>
+        <TableSettings />
+        <div className={s.modeSwitch} role="group" aria-label="牌局交互模式">
+          <button
+            aria-pressed={mode === "snapshot"}
+            onClick={() => setMode("snapshot")}
+          >
+            局面录入 <small>直接填写当前状态</small>
+          </button>
+          <button
+            aria-pressed={mode === "live"}
+            onClick={() => setMode("live")}
+          >
+            逐步记录 <small>按发牌与下注顺序推进</small>
+          </button>
+        </div>
         <div className={s.workspace}>
-          <section className={s.inputPanel} aria-label="牌局设置">
+          <div style={{ display: mode === "live" ? undefined : "none" }}>
+            <LiveTable
+              CardView={Card}
+              Picker={CardPicker}
+              analyzing={busy}
+              onAnalyze={(scene) => {
+                if (busy) return;
+                setErrors([]);
+                void calculate(scene);
+              }}
+            />
+          </div>
+          <section
+            className={s.inputPanel}
+            aria-label="牌局设置"
+            style={{ display: mode === "snapshot" ? undefined : "none" }}
+          >
             <div className={s.panelHeading}>
               <div>
-                <span className={s.eyebrow}>THE SCENARIO</span>
-                <h2>构建你的牌局</h2>
+                <h2>当前局面</h2>
               </div>
               <button className={s.exampleButton} onClick={() => reset(true)}>
                 载入示例 ↗
               </button>
             </div>
+            {game && (
+              <p className={s.caution}>
+                当前与逐步记录共用同一手牌。直接修改牌面、阶段或底池后，行动历史将不再适用。
+              </p>
+            )}
             <section className={s.section}>
               <div className={s.sectionHeading}>
                 <h3>
@@ -705,14 +860,6 @@ export default function App() {
                     />
                   ))}
                 </div>
-                <div className={s.heroNote}>
-                  <span className={s.noteSuit}>♠</span>
-                  <p>
-                    点击牌面选择手牌
-                    <br />
-                    <small>已使用的牌自动排除</small>
-                  </p>
-                </div>
               </div>
             </section>
             <section className={s.section}>
@@ -735,6 +882,7 @@ export default function App() {
                 ).map((stage) => (
                   <button
                     key={stage.size}
+                    aria-label={`${stage.label}${stage.size ? ` ${stage.size} 张` : ""}`}
                     aria-pressed={draft.boardSize === stage.size}
                     className={
                       draft.boardSize === stage.size ? s.segmentActive : ""
@@ -752,181 +900,43 @@ export default function App() {
                 ))}
               </div>
               <div className={`${s.cards} ${s.boardCards}`}>
-                {Array.from({ length: 5 }, (_, index) =>
-                  index < draft.boardSize ? (
-                    <Card
-                      key={index}
-                      small
-                      value={draft.board[index] ?? null}
-                      label={
-                        index < 3
-                          ? `翻牌 ${index + 1}`
-                          : index === 3
-                            ? "转牌"
-                            : "河牌"
-                      }
-                      onClick={() =>
-                        setPicker({
-                          group: "board",
-                          index: Math.min(index, draft.board.length),
-                        })
-                      }
-                      onRemove={() =>
-                        patch({
-                          board: draft.board.filter((_, i) => i !== index),
-                        })
-                      }
-                    />
-                  ) : (
-                    <div key={index} className={s.unrevealed}>
-                      <span>♠</span>
-                      <small>
-                        {index < 3 ? "FLOP" : index === 3 ? "TURN" : "RIVER"}
-                      </small>
-                    </div>
-                  ),
-                )}
-              </div>
-            </section>
-            <section className={s.section}>
-              <div className={s.sectionHeading}>
-                <h3>
-                  <span>03</span> 对手设置
-                </h3>
-                <span className={s.sectionMeta}>
-                  含我共 {draft.opponents.length + 1} 人
-                </span>
-              </div>
-              <div className={s.playerCount}>
-                <label htmlFor="opponent-count">在局对手</label>
-                <div>
-                  <button
-                    onClick={() =>
-                      patch({ opponents: draft.opponents.slice(0, -1) })
+                {Array.from({ length: draft.boardSize }, (_, index) => (
+                  <Card
+                    key={index}
+                    small
+                    value={draft.board[index] ?? null}
+                    label={
+                      index < 3
+                        ? `翻牌 ${index + 1}`
+                        : index === 3
+                          ? "转牌"
+                          : "河牌"
                     }
-                    disabled={draft.opponents.length <= 1}
-                    aria-label="减少一名对手"
-                  >
-                    −
-                  </button>
-                  <output id="opponent-count">{draft.opponents.length}</output>
-                  <button
                     onClick={() =>
-                      patch({
-                        opponents: [...draft.opponents, { kind: "random" }],
+                      setPicker({
+                        group: "board",
+                        index: Math.min(index, draft.board.length),
                       })
                     }
-                    disabled={draft.opponents.length >= 8}
-                    aria-label="增加一名对手"
-                  >
-                    ＋
-                  </button>
-                </div>
-              </div>
-              <div className={s.opponents}>
-                {draft.opponents.map((opponent, player) => (
-                  <div className={s.opponent} key={player}>
-                    <div className={s.opponentLine}>
-                      <span>
-                        <i>{String(player + 1).padStart(2, "0")}</i> 对手{" "}
-                        {player + 1}
-                      </span>
-                      <select
-                        aria-label={`对手 ${player + 1} 手牌模式`}
-                        value={opponent.kind}
-                        onChange={(event) =>
-                          patch({
-                            opponents: draft.opponents.map((o, i) =>
-                              i !== player
-                                ? o
-                                : event.target.value === "random"
-                                  ? { kind: "random" }
-                                  : { kind: "exact", cards: [null, null] },
-                            ),
-                          })
-                        }
-                      >
-                        <option value="random">随机手牌</option>
-                        <option value="exact">指定手牌</option>
-                      </select>
-                    </div>
-                    {opponent.kind === "exact" && (
-                      <div className={`${s.cards} ${s.opponentCards}`}>
-                        {opponent.cards.map((card, index) => (
-                          <Card
-                            key={index}
-                            value={card}
-                            small
-                            label={`对手 ${player + 1} 手牌 ${index + 1}`}
-                            onClick={() =>
-                              setPicker({ group: "opponent", player, index })
-                            }
-                            onRemove={() =>
-                              patch({
-                                opponents: draft.opponents.map((o, i) => {
-                                  if (i !== player || o.kind !== "exact")
-                                    return o;
-                                  const cards = [...o.cards] as [
-                                    number | null,
-                                    number | null,
-                                  ];
-                                  cards[index] = null;
-                                  return { ...o, cards };
-                                }),
-                              })
-                            }
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                    onRemove={() =>
+                      patch({
+                        board: draft.board.filter((_, i) => i !== index),
+                      })
+                    }
+                  />
                 ))}
               </div>
-              <p className={s.helper}>
-                随机手牌对所有合法组合等概率取样；不从下注金额推断对手范围。
-              </p>
-              <details className={s.deadDetails}>
-                <summary>
-                  已知死牌 <span>{draft.deadCards.length} 张</span>
-                </summary>
-                <p className={s.helper}>
-                  仅添加明确知道且不会再出现的牌。未知弃牌无需填写。
-                </p>
-                <div className={s.deadCards}>
-                  {draft.deadCards.map((card) => (
-                    <button
-                      key={card}
-                      className={card % 2 === 1 ? s.red : ""}
-                      onClick={() =>
-                        patch({
-                          deadCards: draft.deadCards.filter((v) => v !== card),
-                        })
-                      }
-                      aria-label={`移除死牌${cardLabel(card)}`}
-                    >
-                      {ranks[Math.floor(card / 4)]}
-                      {suits[card % 4]} <small>×</small>
-                    </button>
-                  ))}
-                  <button
-                    className={s.addDead}
-                    onClick={() => setPicker({ group: "dead", index: 0 })}
-                  >
-                    ＋ 添加
-                  </button>
-                </div>
-              </details>
             </section>
             <section className={s.section}>
               <div className={s.sectionHeading}>
                 <h3>
-                  <span>04</span> 底池与策略
+                  <span>03</span> 底池与跟注
                 </h3>
                 <span className={s.sectionMeta}>单底池 · 无抽水</span>
               </div>
               <div className={s.moneyGrid}>
                 <label>
-                  当前底池 <span>P</span>
+                  当前底池
                   <div>
                     <input
                       inputMode="numeric"
@@ -938,7 +948,7 @@ export default function App() {
                   </div>
                 </label>
                 <label>
-                  需要跟注 <span>C</span>
+                  需要跟注
                   <div>
                     <input
                       inputMode="numeric"
@@ -951,7 +961,7 @@ export default function App() {
                 </label>
               </div>
               <p className={s.helper}>
-                底池包含对手当前下注，不包含你这次需要追加的跟注额。
+                底池包含桌面上已投入的筹码；无需跟注时填 0。
               </p>
               <label className={s.checkbox}>
                 <input
@@ -968,59 +978,6 @@ export default function App() {
                   后续仍可下注：EV 仅作“无后续投入”假设下的参考。
                 </p>
               )}
-              <div className={s.field}>
-                <label htmlFor="strategy">分析策略</label>
-                <select
-                  id="strategy"
-                  value={draft.strategyId}
-                  onChange={(event) =>
-                    patch({ strategyId: event.target.value })
-                  }
-                >
-                  {strategies.length ? (
-                    strategies.map((strategy) => (
-                      <option key={strategy.id} value={strategy.id}>
-                        {strategy.name}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="pot-odds">
-                      底池赔率基线 · 等待服务连接
-                    </option>
-                  )}
-                  {strategies.length > 0 &&
-                    !strategies.some(
-                      (strategy) => strategy.id === draft.strategyId,
-                    ) && (
-                      <option value={draft.strategyId}>
-                        不可用策略：{draft.strategyId}
-                      </option>
-                    )}
-                </select>
-                <p className={s.helper}>
-                  {strategies.find(
-                    (strategy) => strategy.id === draft.strategyId,
-                  )?.description ||
-                    "基于摊牌权益与跟注成本分析，更多策略将通过插件接入。"}
-                </p>
-              </div>
-              <div className={s.computeSettings}>
-                <label htmlFor="samples">模拟精度</label>
-                <select
-                  id="samples"
-                  value={draft.samples}
-                  onChange={(event) =>
-                    patch({
-                      samples: Number(event.target.value) as Draft["samples"],
-                    })
-                  }
-                >
-                  <option value="10000">快速 · 10,000 次</option>
-                  <option value="50000">标准 · 50,000 次</option>
-                  <option value="100000">精细 · 100,000 次</option>
-                </select>
-                <span>小规模状态自动精确枚举</span>
-              </div>
             </section>
             <div className={s.inputActions}>
               {errors.length > 0 && (
@@ -1043,16 +1000,21 @@ export default function App() {
                 <span>{busy ? "计算任务进行中" : "计算当前牌局"}</span>
                 <span>{busy ? "◌" : "→"}</span>
               </button>
-              <div className={s.scenarioTools}>
-                <span>◦ 牌局自动保存在此浏览器</span>
-                <div>
-                  <button onClick={() => reset(false)}>重置</button>
-                  <button onClick={() => fileInput.current?.click()}>
-                    导入
-                  </button>
-                  <button onClick={exportScene}>导出</button>
+              <details className={s.optionalSettings}>
+                <summary>
+                  牌局工具 <span>自动保存 · 导入 / 导出</span>
+                </summary>
+                <div className={s.scenarioTools}>
+                  <span>◦ 牌局自动保存在此浏览器</span>
+                  <div>
+                    <button onClick={() => reset(false)}>重置</button>
+                    <button onClick={() => fileInput.current?.click()}>
+                      导入
+                    </button>
+                    <button onClick={exportScene}>导出</button>
+                  </div>
                 </div>
-              </div>
+              </details>
               <input
                 ref={fileInput}
                 type="file"
@@ -1063,14 +1025,33 @@ export default function App() {
             </div>
           </section>
           <aside className={s.resultColumn}>
+            <div className={s.resultPanel}>
+              <OpponentSettings CardView={Card} onPick={setPicker} />
+            </div>
+            <AnalysisSettings strategies={strategies} />
+            {mode === "live" && (
+              <div className={s.inputActions}>
+                {errors.length > 0 && (
+                  <div className={s.errorBox} role="alert">
+                    {errors.map((error) => (
+                      <p key={error}>{error}</p>
+                    ))}
+                  </div>
+                )}
+                {message && <p role="status">{message}</p>}
+                <div className={s.scenarioTools}>
+                  <button onClick={exportScene}>导出当前局面</button>
+                </div>
+              </div>
+            )}
             <section
+              ref={resultPanel}
               className={s.resultPanel}
               aria-label="计算结果"
               aria-busy={busy}
             >
               <div className={s.resultHeading}>
                 <div>
-                  <span className={s.eyebrow}>THE ANALYSIS</span>
                   <h2>牌局分析</h2>
                 </div>
                 <span className={s.liveBadge}>
@@ -1081,7 +1062,10 @@ export default function App() {
               {task && (
                 <div className={s.taskProgress} role="status">
                   <div>
-                    <span>{statusText[task.status]}</span>
+                    <span>
+                      {statusText[task.status]}
+                      {task.completion === "partial" ? " · 部分策略已完成" : ""}
+                    </span>
                     {activeTask(task.status) && (
                       <button
                         onClick={() => void cancel()}
@@ -1098,9 +1082,8 @@ export default function App() {
                         value={Math.max(0, Math.min(1, task.progress))}
                       />
                       <small>
-                        {Math.round(task.progress * 100)}% ·{" "}
-                        {task.completed_samples.toLocaleString("zh-CN")} /{" "}
-                        {task.total_samples.toLocaleString("zh-CN")}
+                        {Math.round(task.progress * 100)}% ·
+                        所有策略共享计算预算
                       </small>
                     </>
                   )}
@@ -1115,24 +1098,29 @@ export default function App() {
                   )}
                 </div>
               )}
+              <Comparison
+                strategies={strategies}
+                outcomes={
+                  task?.outcomes?.length
+                    ? task.outcomes
+                    : (completed?.outcomes ?? [])
+                }
+                active={activeStrategy}
+                onSelect={setActiveStrategy}
+              />
               {completed ? (
                 <Results
-                  result={completed.result}
+                  result={
+                    completed.outcomes.find(
+                      (item) => item.strategy_id === activeStrategy,
+                    )?.result ?? completed.result
+                  }
                   stale={completed.input !== fingerprint}
                 />
               ) : (
                 <div className={s.emptyResult}>
-                  <div className={s.emptyIllustration}>
-                    <span>♠</span>
-                    <i />
-                    <i />
-                  </div>
-                  <h3>先选好你的牌</h3>
-                  <p>
-                    填入手牌、公共牌与底池信息，
-                    <br />
-                    让每个概率都有清晰的来处。
-                  </p>
+                  <h3>选好手牌，就可以开始</h3>
+                  <p>填写当前局面，点击“计算当前牌局”查看权益与跟注成本。</p>
                   <div className={s.emptyMetrics}>
                     <div>
                       <span>底池权益</span>
@@ -1145,29 +1133,9 @@ export default function App() {
                       <strong>—</strong>
                     </div>
                   </div>
-                  <button className={s.textButton} onClick={() => reset(true)}>
-                    用一个示例牌局开始 →
-                  </button>
                 </div>
               )}
             </section>
-            <section className={s.readingNote}>
-              <span>♣</span>
-              <div>
-                <h3>读懂概率，也读懂假设。</h3>
-                <p>
-                  胜率取决于已知牌和对手范围。赔率衡量跟注的成本，不能单独决定后续所有行动。
-                </p>
-                <p>当前支持单底池筹码分析；边池、抽水与锦标赛 ICM 尚未纳入。</p>
-              </div>
-            </section>
-            <div className={s.systemNote}>
-              <span>52 张牌</span>
-              <i />
-              <span>2–9 人</span>
-              <i />
-              <span>标准德州扑克</span>
-            </div>
           </aside>
         </div>
         <footer className={s.footer}>

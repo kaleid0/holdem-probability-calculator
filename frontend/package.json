@@ -1,7 +1,7 @@
 {
   "name": "holdem-lab-web",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 5173",
@@ -11,7 +11,8 @@
     "test": "vitest run",
     "lint": "eslint .",
     "format": "prettier --write src",
-    "api:generate": "openapi-typescript ../contracts/openapi.json -o src/api/generated/schema.d.ts"
+    "api:generate": "openapi-typescript ../contracts/openapi.json -o src/api/generated/schema.d.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "react": "^19.2.0",
@@ -20,6 +21,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@playwright/test": "^1.64.1",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^5.0.4",

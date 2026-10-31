@@ -55,6 +55,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/ranges/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Range Preview */
+        post: operations["range_preview_api_v1_ranges_preview_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/strategies": {
         parameters: {
             query?: never;
@@ -93,6 +110,36 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** ActionAssessment */
+        ActionAssessment: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "fold" | "call";
+            /** Amount */
+            amount?: number | null;
+            /** Ev */
+            ev?: number | null;
+            /**
+             * Ev Baseline
+             * @default 相对此刻弃牌的增量收益
+             */
+            ev_baseline: string;
+            /**
+             * Ev Unit
+             * @default chips
+             * @constant
+             */
+            ev_unit: "chips";
+            /** Explanation */
+            explanation: string;
+            /**
+             * Method
+             * @default showdown-reference
+             */
+            method: string;
+        };
         /** AnalysisRequest */
         AnalysisRequest: {
             /** Board */
@@ -110,7 +157,7 @@ export interface components {
                 number
             ];
             /** Opponents */
-            opponents: (components["schemas"]["RandomOpponent"] | components["schemas"]["ExactOpponent"])[];
+            opponents: (components["schemas"]["RandomOpponent"] | components["schemas"]["ExactOpponent"] | components["schemas"]["RangeOpponent"])[];
             /**
              * Pot Before Call
              * @default 150
@@ -124,9 +171,9 @@ export interface components {
             /**
              * Schema Version
              * @default 1
-             * @constant
+             * @enum {integer}
              */
-            schema_version: 1;
+            schema_version: 1 | 2;
             /**
              * Seed
              * @default 42
@@ -138,6 +185,8 @@ export interface components {
              * @enum {string}
              */
             settlement_assumption: "showdownAfterCall" | "futureBettingPossible";
+            /** Strategies */
+            strategies?: components["schemas"]["StrategySelection"][] | null;
             /** Strategy Config */
             strategy_config?: {
                 [key: string]: unknown;
@@ -156,11 +205,13 @@ export interface components {
             break_even_equity: number | null;
             /** Call Ev */
             call_ev: number | null;
+            /** Candidates */
+            candidates?: components["schemas"]["ActionAssessment"][];
             /** Elapsed Ms */
             elapsed_ms: number;
             /**
              * Engine Version
-             * @default 0.1.0
+             * @default 0.2.0
              */
             engine_version: string;
             /** Equity */
@@ -171,6 +222,11 @@ export interface components {
             lose_probability: number | null;
             /** Method */
             method: ("exact" | "monteCarlo") | null;
+            /**
+             * Model Version
+             * @default weighted-independent-v1
+             */
+            model_version: string;
             /** Pot Odds Ratio */
             pot_odds_ratio: string | null;
             /** Recommendation */
@@ -181,7 +237,13 @@ export interface components {
             scenario_hash: string;
             /** Seed */
             seed: number;
+            /** Signals */
+            signals?: string[];
             strategy: components["schemas"]["StrategyIdentity"];
+            /** Strategy Config */
+            strategy_config?: {
+                [key: string]: unknown;
+            };
             /** Tie Probability */
             tie_probability: number | null;
             /** Win Probability */
@@ -212,6 +274,43 @@ export interface components {
              * @enum {string}
              */
             kind: "random";
+        };
+        /** RangeOpponent */
+        RangeOpponent: {
+            /** Combos */
+            combos?: components["schemas"]["WeightedCombo"][];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "range";
+            /**
+             * Text
+             * @default
+             */
+            text: string;
+        };
+        /** RangePreview */
+        RangePreview: {
+            /** Blocked Combos */
+            blocked_combos: number;
+            /** Class Weights */
+            class_weights: {
+                [key: string]: number;
+            };
+            /** Combos */
+            combos: components["schemas"]["WeightedCombo"][];
+            /** Effective Combos */
+            effective_combos: number;
+            /** Total Combos */
+            total_combos: number;
+        };
+        /** RangePreviewRequest */
+        RangePreviewRequest: {
+            /** Known Cards */
+            known_cards?: number[];
+            /** Text */
+            text: string;
         };
         /** StrategyIdentity */
         StrategyIdentity: {
@@ -251,6 +350,28 @@ export interface components {
             /** Version */
             version: string;
         };
+        /** StrategyOutcome */
+        StrategyOutcome: {
+            /** Reasons */
+            reasons?: string[];
+            result?: components["schemas"]["AnalysisResult"] | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "ok" | "unsupported" | "insufficient-data" | "error";
+            /** Strategy Id */
+            strategy_id: string;
+        };
+        /** StrategySelection */
+        StrategySelection: {
+            /** Config */
+            config?: {
+                [key: string]: unknown;
+            };
+            /** Id */
+            id: string;
+        };
         /** TaskCreated */
         TaskCreated: {
             /**
@@ -265,8 +386,16 @@ export interface components {
         TaskSnapshot: {
             /** Completed Samples */
             completed_samples: number;
+            /**
+             * Completion
+             * @default none
+             * @enum {string}
+             */
+            completion: "complete" | "partial" | "none";
             /** Error */
             error?: string | null;
+            /** Outcomes */
+            outcomes?: components["schemas"]["StrategyOutcome"][];
             /** Progress */
             progress: number;
             result?: components["schemas"]["AnalysisResult"] | null;
@@ -292,6 +421,19 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /** WeightedCombo */
+        WeightedCombo: {
+            /** Cards */
+            cards: [
+                number,
+                number
+            ];
+            /**
+             * Weight
+             * @default 1
+             */
+            weight: number;
         };
     };
     responses: never;
@@ -384,6 +526,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TaskSnapshot"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    range_preview_api_v1_ranges_preview_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RangePreviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RangePreview"];
                 };
             };
             /** @description Validation Error */

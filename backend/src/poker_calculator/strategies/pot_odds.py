@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict
 
 from poker_calculator.application.services import AnalysisServices
 from poker_calculator.domain.models import (
+    ActionAssessment,
     AnalysisRequest,
     AnalysisResult,
     StrategyIdentity,
@@ -22,7 +23,7 @@ class PotOddsStrategy:
     manifest = StrategyManifest(
         id="pot-odds",
         name="底池赔率基线",
-        version="0.1.0",
+        version="0.2.0",
         description="比较摊牌权益与跟注成本；不评估加注或后续下注策略。",
         config_schema=PotOddsConfig.model_json_schema(),
         capabilities={
@@ -30,7 +31,7 @@ class PotOddsStrategy:
             "max_players": 9,
             "side_pots": False,
             "objective": "chip_ev",
-            "opponent_models": ["random", "exact"],
+            "opponent_models": ["random", "exact", "range"],
         },
     )
 
@@ -53,6 +54,7 @@ class PotOddsStrategy:
             "标准 52 张牌、单次发牌、单底池；不计抽水与锦标赛 ICM。",
             "随机对手在所有不冲突的合法两张牌组合中等概率取牌。",
             "权益包含多人平局分摊；显示的胜率为最终独赢概率。",
+            "范围权重为相对可能性；多名对手的联合权重为乘积，再以无牌冲突为条件归一化。",
         ]
         if call > 0:
             divisor = math.gcd(pot, call)
@@ -98,6 +100,24 @@ class PotOddsStrategy:
             strategy=StrategyIdentity(
                 id=self.manifest.id, name=self.manifest.name, version=self.manifest.version
             ),
-            scenario_hash=hashlib.sha256(request.model_dump_json().encode()).hexdigest(),
+            scenario_hash=hashlib.sha256(
+                request.model_dump_json(
+                    exclude={"strategy_id", "strategy_config", "strategies"}
+                ).encode()
+            ).hexdigest(),
             seed=request.seed,
+            candidates=[
+                ActionAssessment(
+                    action="fold", amount=0, ev=0, explanation="相对此刻弃牌，增量收益为零。"
+                ),
+                ActionAssessment(
+                    action="call",
+                    amount=call,
+                    ev=call_ev,
+                    explanation="跟注后无额外投入并发完公共牌的参考 EV；不包含加注。",
+                ),
+            ]
+            if call > 0
+            else [],
+            strategy_config=request.strategy_config,
         )

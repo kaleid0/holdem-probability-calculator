@@ -3,7 +3,12 @@ from typing import Any
 import pytest
 
 from poker_calculator.application.services import AnalysisServices
-from poker_calculator.domain.models import AnalysisRequest, AnalysisResult, StrategyIdentity
+from poker_calculator.domain.models import (
+    AnalysisRequest,
+    AnalysisResult,
+    StrategyIdentity,
+    SupportCheck,
+)
 from poker_calculator.infrastructure.compute import execute_analysis
 
 
@@ -14,6 +19,12 @@ class NeverCancelled:
 
 class TableOnlyStrategy:
     """An intentionally engine-free plugin demonstrates independent strategy execution."""
+
+    def validate_config(self, request: AnalysisRequest) -> None:
+        pass
+
+    def check_support(self, request: AnalysisRequest) -> SupportCheck:
+        return SupportCheck(status="supported")
 
     def analyze(self, request: AnalysisRequest, services: AnalysisServices) -> AnalysisResult:
         services.checkpoint()

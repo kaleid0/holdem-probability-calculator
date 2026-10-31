@@ -1,0 +1,390 @@
+.table {
+  max-width: 820px;
+  margin: auto;
+  background: #fffef9;
+  border: 1px solid #dce1d5;
+  border-radius: 14px;
+  padding: clamp(16px, 3vw, 28px);
+}
+.heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.startActions {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e7dc;
+  display: flex;
+  justify-content: flex-start;
+}
+.caption,
+.note {
+  color: #788571;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.heading h2 {
+  font-size: clamp(18px, 3vw, 23px);
+  margin: 7px 0 0;
+  color: #304d37;
+}
+.pot {
+  text-align: right;
+  white-space: nowrap;
+  font-size: 12px;
+  color: #64775c;
+}
+.pot strong {
+  display: block;
+  font-size: 30px;
+  color: #345c35;
+}
+.steps {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  gap: 6px;
+  margin: 20px 0;
+}
+.steps li {
+  flex: 1;
+  padding: 9px 3px;
+  text-align: center;
+  font-size: 12px;
+  border-bottom: 2px solid #e2e7dc;
+  color: #7a8772;
+}
+.steps li[aria-current] {
+  color: #365e34;
+  border-color: #557b40;
+  font-weight: 650;
+}
+.setupDetails {
+  border-bottom: 1px solid #e2e7dc;
+  margin-bottom: 20px;
+  font-size: 12px;
+  color: #64775c;
+}
+.setupDetails > summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  min-height: 44px;
+  padding-bottom: 12px;
+  list-style: none;
+  cursor: pointer;
+}
+.setupDetails > summary::-webkit-details-marker {
+  display: none;
+}
+.setupDetails > summary::after {
+  content: "⌄";
+  margin-left: auto;
+}
+.setupDetails[open] > summary::after {
+  transform: rotate(180deg);
+}
+.setupSummary {
+  color: #7c8873;
+  font-size: 11px;
+}
+.setupLocked {
+  margin: 0 0 16px;
+  line-height: 1.8;
+}
+.settings {
+  display: grid;
+  gap: 16px;
+  font-size: 12px;
+  color: #64775c;
+  margin: 0 0 22px;
+}
+.setupField {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.setupField legend {
+  padding: 0;
+  margin-bottom: 10px;
+  color: #435b3c;
+  font-size: 13px;
+  font-weight: 600;
+}
+.setupField legend > span {
+  margin-left: 8px;
+  color: #84907c;
+  font-size: 11px;
+  font-weight: 400;
+}
+.countOptions,
+.dealerOptions {
+  display: grid;
+  gap: 7px;
+}
+.countOptions {
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+}
+.dealerOptions {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.settings button {
+  min-height: 48px;
+  padding: 9px;
+  border: 1px solid #cdd9c1;
+  background: #fffefb;
+  color: #53694b;
+  border-radius: 7px;
+  font-size: 14px;
+}
+.settings button[aria-pressed="true"] {
+  background: #edf3e6;
+  border-color: #557b40;
+  box-shadow: inset 0 0 0 1px #557b40;
+  color: #345b3c;
+  font-weight: 600;
+}
+.countOptions small {
+  margin-left: 3px;
+  font-size: 10px;
+  font-weight: 400;
+}
+.dealerOptions button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+  padding-inline: 11px;
+}
+.dealerOptions small {
+  display: inline-block;
+  font-size: 10px;
+  margin-left: 4px;
+  color: #84907c;
+}
+.dealerOptions b {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #345b3c;
+  color: #fffef9;
+  font-size: 11px;
+}
+.setupPreview {
+  padding: 10px 12px;
+  background: #f4f6f0;
+  border-radius: 8px;
+  font-size: 11px;
+  line-height: 1.8;
+}
+.setupPreview p {
+  margin: 0;
+}
+.setupPreview strong {
+  color: #435b3c;
+  font-weight: 600;
+}
+.cardArea {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 28px;
+  margin: 0 0 20px;
+}
+.cardArea h3 {
+  color: #62745a;
+  font-size: 12px;
+  font-weight: 500;
+  margin: 0 0 10px;
+}
+.cards {
+  display: flex;
+  gap: 8px;
+}
+.seats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+  margin: 16px 0;
+}
+.seat {
+  border: 1px solid #dbe2d4;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.seat strong,
+.seat span {
+  display: block;
+}
+.seat span {
+  font-size: 11px;
+  margin-top: 7px;
+  color: #77836d;
+}
+.active {
+  border-color: #557b40;
+  background: #eef4e3;
+}
+.folded {
+  opacity: 0.6;
+}
+.actions {
+  background: #f2f5eb;
+  border-radius: 10px;
+  padding: 16px;
+}
+.actionHint {
+  margin: 0 0 14px;
+  font-size: 13px;
+  color: #52674c;
+  line-height: 1.7;
+}
+.buttons {
+  display: grid;
+  grid-template-columns: 0.8fr 1.4fr 1fr;
+  gap: 8px;
+}
+.table button {
+  min-height: 44px;
+}
+.buttons button,
+.primary,
+.analyze {
+  padding: 11px 12px;
+  border: 1px solid #cdd9c1;
+  border-radius: 8px;
+  background: #fffef9;
+  color: #435b3c;
+  font-size: 14px;
+}
+.table .primary {
+  background: #345b3c;
+  color: #fffef9;
+  border-color: #345b3c;
+}
+.table > .primary,
+.finished .primary {
+  width: 100%;
+}
+.table button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.cards button:disabled {
+  opacity: 1;
+  cursor: default;
+}
+.buttons .fold {
+  background: transparent;
+  border-color: transparent;
+  color: #8a665b;
+}
+.analyze {
+  margin-top: 14px;
+  width: 100%;
+  background: transparent;
+  border-color: transparent;
+  color: #476a3c;
+}
+.raisePanel {
+  border-top: 1px solid #dbe2d1;
+  margin-top: 16px;
+  padding-top: 16px;
+}
+.slider {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #435b3c;
+}
+.slider strong {
+  font-size: 23px;
+}
+.slider input {
+  width: 100%;
+  min-height: 44px;
+  accent-color: #557b40;
+}
+.raiseFooter {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #69785e;
+}
+.lastAction {
+  font-size: 12px;
+  color: #778571;
+  margin: 14px 0 0;
+  line-height: 1.7;
+}
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+}
+.toolbar button {
+  border: 0;
+  background: transparent;
+  color: #708168;
+  padding: 0 4px;
+  font-size: 12px;
+}
+.finished h3 {
+  font-size: 16px;
+  color: #435b3c;
+  line-height: 1.8;
+}
+.finished .primary {
+  margin-top: 14px;
+}
+.details {
+  border-top: 1px solid #e2e7dc;
+  font-size: 12px;
+  color: #64775c;
+}
+.details summary {
+  cursor: pointer;
+  padding: 16px 0;
+  min-height: 44px;
+}
+.details summary span {
+  color: #87917e;
+  font-size: 11px;
+  margin-left: 10px;
+}
+.history {
+  padding-left: 20px;
+  line-height: 1.9;
+  font-size: 12px;
+  color: #64775c;
+}
+.history li {
+  padding-bottom: 7px;
+}
+@media (max-width: 540px) {
+  .countOptions {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .dealerOptions button {
+    padding-inline: 8px;
+    font-size: 12px;
+  }
+  .cardArea {
+    gap: 18px;
+  }
+  .cardArea > div {
+    max-width: 100%;
+  }
+}

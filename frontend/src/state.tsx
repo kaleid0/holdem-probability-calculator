@@ -2,18 +2,16 @@ import { createContext, useContext, useEffect, useReducer } from "react";
 import type { Dispatch, ReactNode } from "react";
 import { emptyDraft, parseSaved } from "./model";
 import type { Draft } from "./model";
+import { sessionReducer } from "./session";
+import type { SessionAction, Session } from "./session";
 
-type Action =
-  { type: "replace"; draft: Draft } | { type: "patch"; patch: Partial<Draft> };
-export function reducer(state: Draft, action: Action): Draft {
-  return action.type === "replace"
-    ? action.draft
-    : { ...state, ...action.patch };
-}
-const storageKey = "holdem-lab:scenario:v1";
+const storageKey = "holdem-lab:scenario:v3";
 function loadDraft(): Draft {
   try {
-    const saved = localStorage.getItem(storageKey);
+    const saved =
+      localStorage.getItem(storageKey) ??
+      localStorage.getItem("holdem-lab:scenario:v2") ??
+      localStorage.getItem("holdem-lab:scenario:v1");
     return saved ? parseSaved(saved) : emptyDraft();
   } catch {
     return emptyDraft();
@@ -21,22 +19,31 @@ function loadDraft(): Draft {
 }
 const ScenarioContext = createContext<{
   draft: Draft;
-  dispatch: Dispatch<Action>;
+  game: Session["game"];
+  history: Session["history"];
+  dispatch: Dispatch<SessionAction>;
 } | null>(null);
 export function ScenarioProvider({ children }: { children: ReactNode }) {
-  const [draft, dispatch] = useReducer(reducer, undefined, loadDraft);
+  const [session, dispatch] = useReducer(
+    sessionReducer,
+    undefined,
+    (): Session => ({ draft: loadDraft(), game: null, history: [] }),
+  );
+  const { draft } = session;
   useEffect(() => {
     try {
       localStorage.setItem(
         storageKey,
-        JSON.stringify({ schemaVersion: 1, draft }),
+        JSON.stringify({ schemaVersion: 3, draft }),
       );
     } catch {
       /* Session remains usable when browser storage is unavailable. */
     }
   }, [draft]);
   return (
-    <ScenarioContext value={{ draft, dispatch }}>{children}</ScenarioContext>
+    <ScenarioContext value={{ ...session, dispatch }}>
+      {children}
+    </ScenarioContext>
   );
 }
 export function useScenario() {

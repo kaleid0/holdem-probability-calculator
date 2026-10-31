@@ -7,7 +7,12 @@ from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from itertools import combinations
 
-from poker_calculator.domain.models import AnalysisRequest, ExactOpponent, RandomOpponent
+from poker_calculator.domain.models import (
+    AnalysisRequest,
+    ExactOpponent,
+    RandomOpponent,
+    RangeOpponent,
+)
 from poker_calculator.engines.evaluator import evaluate
 
 EXACT_LIMIT = 50_000
@@ -66,6 +71,16 @@ def calculate_equity(
     cancelled: Callable[[], bool] | None = None,
     time_limit: float = 30.0,
 ) -> EquityResult:
+    if any(isinstance(player, RangeOpponent) for player in request.opponents):
+        from poker_calculator.engines.weighted import weighted_equity
+
+        return weighted_equity(
+            request,
+            progress=progress,
+            cancelled=cancelled,
+            time_limit=time_limit,
+            exact_limit=EXACT_LIMIT,
+        )
     start = time.monotonic()
     known = set(request.hero) | set(request.board) | set(request.dead_cards)
     hands: list[tuple[int, int] | None] = []

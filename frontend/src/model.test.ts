@@ -7,7 +7,7 @@ import {
   toRequest,
   validateDraft,
 } from "./model";
-import { reducer } from "./state";
+import { sessionReducer } from "./session";
 import { activeTask } from "./api/client";
 
 describe("scenario contracts", () => {
@@ -75,12 +75,18 @@ describe("scenario contracts", () => {
   });
   it("reducer preserves unrelated settings and supports full scene replacement", () => {
     const original = exampleDraft();
-    expect(reducer(original, { type: "patch", patch: { pot: "300" } })).toEqual(
-      { ...original, pot: "300" },
-    );
-    expect(reducer(original, { type: "replace", draft: emptyDraft() })).toEqual(
-      emptyDraft(),
-    );
+    expect(
+      sessionReducer(
+        { draft: original, game: null, history: [] },
+        { type: "patch", patch: { pot: "300" } },
+      ).draft,
+    ).toEqual({ ...original, pot: "300" });
+    expect(
+      sessionReducer(
+        { draft: original, game: null, history: [] },
+        { type: "replace", draft: emptyDraft() },
+      ).draft,
+    ).toEqual(emptyDraft());
   });
   it("only polls tasks that can still advance", () => {
     expect(activeTask("running")).toBe(true);

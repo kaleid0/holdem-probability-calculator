@@ -5,10 +5,16 @@ import os
 import time
 import uuid
 from concurrent.futures import Future, ProcessPoolExecutor
-from dataclasses import dataclass
-from typing import Any
+from dataclasses import dataclass, field
+from typing import Any, Literal
 
-from poker_calculator.domain.models import AnalysisRequest, AnalysisResult, TaskSnapshot, TaskStatus
+from poker_calculator.domain.models import (
+    AnalysisRequest,
+    AnalysisResult,
+    StrategyOutcome,
+    TaskSnapshot,
+    TaskStatus,
+)
 from poker_calculator.infrastructure.compute import execute_analysis
 
 
@@ -26,6 +32,8 @@ class Task:
     result: AnalysisResult | None = None
     error: str | None = None
     finished_at: float | None = None
+    outcomes: list[StrategyOutcome] = field(default_factory=list)
+    completion: Literal["complete", "partial", "none"] = "none"
 
 
 class TaskService:
@@ -55,6 +63,8 @@ class TaskService:
             if time.monotonic() - task.finished_at > self.ttl_seconds:
                 task.status = "expired"
                 task.result = None
+                task.outcomes = []
+                task.completion = "none"
                 task.error = "任务结果已过期，请重新计算"
             return
         if task.future.done():
@@ -63,11 +73,24 @@ class TaskService:
             else:
                 try:
                     output = task.future.result()
+                    task.outcomes = [
+                        StrategyOutcome.model_validate(item) for item in output.get("outcomes", [])
+                    ]
+                    task.completion = output.get("completion", "none")
+                    if output.get("result"):
+                        task.result = AnalysisResult.model_validate(output["result"])
                     if output.get("cancelled") or task.status == "cancelling":
                         task.status = "cancelled"
+                    elif task.result is None:
+                        task.status = "failed"
+                        task.error = (
+                            output.get("budget_error") or "所有策略均未产生结果，请查看各策略原因"
+                        )
                     else:
-                        task.result = AnalysisResult.model_validate(output["result"])
                         task.status = "succeeded"
+                        task.error = output.get("budget_error")
+                        if task.error:
+                            task.completion = "partial"
                 except Exception as exc:
                     task.status = "failed"
                     task.error = str(exc) or "计算失败，请降低精度后重试"
@@ -111,6 +134,8 @@ class TaskService:
             total_samples=total,
             result=task.result,
             error=task.error,
+            outcomes=task.outcomes,
+            completion=task.completion,
         )
 
     def cancel(self, task_id: str) -> TaskSnapshot:

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "draft": {
+    "hero": [48, 49],
+    "board": [0, 5, 22, 31, 34],
+    "boardSize": 5,
+    "deadCards": [],
+    "opponents": [{ "kind": "range", "text": "KsKh:0.75 TsTh:0.25" }],
+    "pot": "150",
+    "call": "50",
+    "futureBetting": false,
+    "samples": 10000,
+    "seed": 42,
+    "strategyId": "pot-odds",
+    "strategyIds": ["pot-odds", "equity-rules"],
+    "ruleMargin": 0.05
+  }
+}

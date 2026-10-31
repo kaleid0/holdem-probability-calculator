@@ -83,7 +83,8 @@ def test_queue_bound_and_result_expiry() -> None:
                 break
             time.sleep(0.02)
         assert snapshot.status == "cancelled"
-        time.sleep(0.06)
+        # Avoid scheduler/timer-resolution flakiness on Windows.
+        service.tasks[task.id].finished_at = time.monotonic() - 0.075
         assert service.get(task.id).status == "expired"
     finally:
         service.close()
