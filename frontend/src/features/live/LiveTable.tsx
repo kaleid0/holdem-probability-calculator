@@ -17,6 +17,7 @@ import type { Card } from "../../shared/cards/Card";
 import type { CardPicker } from "../../shared/cards/CardPicker";
 import s from "./LiveTable.module.css";
 import HandSettlement from "./HandSettlement";
+import VisualPokerTable from "./VisualPokerTable";
 
 type Target = { group: "hero" | "board"; index: number };
 type Snapshot = { game: LiveGame; draft: Draft };
@@ -35,6 +36,7 @@ export default function LiveTable({
   const [picker, setPicker] = useState<Target | null>(null);
   const [raiseExtra, setRaiseExtra] = useState(0);
   const [showRaise, setShowRaise] = useState(false);
+  const [visualTable, setVisualTable] = useState(false);
   if (!recordedGame)
     return (
       <section className={s.table} aria-label="逐步记录">
@@ -115,7 +117,10 @@ export default function LiveTable({
     onAnalyze(draft);
   }
   return (
-    <section className={s.table} aria-label="真实牌局">
+    <section
+      className={`${s.table} ${visualTable ? s.visualMode : ""}`}
+      aria-label="真实牌局"
+    >
       <div className={s.heading}>
         <div>
           {game.phase === "hand" ? (
@@ -137,6 +142,23 @@ export default function LiveTable({
           底池<strong>{pot}</strong>
         </div>
       </div>
+      <div className={s.viewBar}>
+        <span className={s.experiment}>实验功能</span>
+        <div className={s.viewSwitch} role="group" aria-label="牌局展示方式">
+          <button
+            aria-pressed={!visualTable}
+            onClick={() => setVisualTable(false)}
+          >
+            列表视图
+          </button>
+          <button
+            aria-pressed={visualTable}
+            onClick={() => setVisualTable(true)}
+          >
+            可视化牌桌
+          </button>
+        </div>
+      </div>
       <ol className={s.steps}>
         {["手牌", "翻前", "翻牌", "转牌", "河牌"].map((label, index) => (
           <li
@@ -155,52 +177,64 @@ export default function LiveTable({
           </li>
         ))}
       </ol>
-      <div className={s.cardArea}>
-        <div>
-          <h3>我的手牌</h3>
-          <div className={s.cards}>
-            {draft.hero.map((card, index) => (
-              <CardView
-                key={index}
-                value={card}
-                small={game.phase !== "hand"}
-                label={`手牌 ${index + 1}`}
-                onClick={
-                  game.phase === "hand"
-                    ? () => setPicker({ group: "hero", index })
-                    : undefined
-                }
-              />
-            ))}
-          </div>
-        </div>
-        {dealSize > 0 && (
+      {visualTable ? (
+        <VisualPokerTable
+          game={game}
+          draft={draft}
+          dealSize={dealSize}
+          CardView={CardView}
+          onPick={setPicker}
+        />
+      ) : (
+        <div className={s.cardArea}>
           <div>
-            <h3>
-              {game.phase === "deal" ? `选择${streetName(nextSize)}` : "公共牌"}
-            </h3>
+            <h3>我的手牌</h3>
             <div className={s.cards}>
-              {Array.from({ length: dealSize }, (_, index) => (
+              {draft.hero.map((card, index) => (
                 <CardView
                   key={index}
-                  small
-                  value={draft.board[index] ?? null}
-                  label={`公共牌 ${index + 1}`}
+                  value={card}
+                  small={game.phase !== "hand"}
+                  label={`手牌 ${index + 1}`}
                   onClick={
-                    game.phase === "deal" && index >= game.street
-                      ? () =>
-                          setPicker({
-                            group: "board",
-                            index: Math.min(index, draft.board.length),
-                          })
+                    game.phase === "hand"
+                      ? () => setPicker({ group: "hero", index })
                       : undefined
                   }
                 />
               ))}
             </div>
           </div>
-        )}
-      </div>
+          {dealSize > 0 && (
+            <div>
+              <h3>
+                {game.phase === "deal"
+                  ? `选择${streetName(nextSize)}`
+                  : "公共牌"}
+              </h3>
+              <div className={s.cards}>
+                {Array.from({ length: dealSize }, (_, index) => (
+                  <CardView
+                    key={index}
+                    small
+                    value={draft.board[index] ?? null}
+                    label={`公共牌 ${index + 1}`}
+                    onClick={
+                      game.phase === "deal" && index >= game.street
+                        ? () =>
+                            setPicker({
+                              group: "board",
+                              index: Math.min(index, draft.board.length),
+                            })
+                        : undefined
+                    }
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       {game.phase === "hand" &&
         (game.folded.filter((f) => !f).length < 2 ? (
           <p className={s.note}>

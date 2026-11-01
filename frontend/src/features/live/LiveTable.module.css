@@ -60,6 +60,45 @@
   gap: 5px;
   margin: 22px 0;
 }
+.viewBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+.experiment {
+  padding: 3px 8px;
+  border: 1px solid #e7ddc5;
+  border-radius: 5px;
+  background: #faf5e9;
+  color: #7e6736;
+  font-size: 11px;
+}
+.viewSwitch {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-subtle);
+}
+.viewSwitch button {
+  min-height: 38px;
+  padding: 7px 11px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+}
+.viewSwitch button[aria-pressed="true"] {
+  border-color: #d7e4dc;
+  background: var(--surface);
+  color: var(--green);
+  box-shadow: 0 1px 3px #173f3408;
+}
 .steps li {
   flex: 1;
   padding: 10px 3px;
@@ -353,6 +392,15 @@
   padding-bottom: 8px;
 }
 @media (max-width: 600px) {
+  .visualMode .viewBar {
+    margin-top: 12px;
+  }
+  .visualMode .steps {
+    margin-block: 12px;
+  }
+  .visualMode .steps li {
+    padding-block: 6px;
+  }
   .table {
     padding: 18px 16px;
   }
