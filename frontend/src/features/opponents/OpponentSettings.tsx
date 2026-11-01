@@ -1,10 +1,11 @@
 import type { ComponentType, ComponentProps } from "react";
-import type { Card as CardComponent } from "./App";
-import { useScenario } from "./state";
-import type { Draft } from "./model";
-import { usedCards, ranks, suits, cardLabel } from "./model";
+import type { Card as CardComponent } from "../../shared/cards/Card";
+import { useScenario } from "../../state";
+import type { Draft } from "../../model";
+import { usedCards, ranks, suits, cardLabel } from "../../model";
 import RangeEditor from "./RangeEditor";
-import s from "./App.module.css";
+import s from "./OpponentSettings.module.css";
+import ui from "../../shared/ui/Shared.module.css";
 type Target =
   | { group: "opponent"; player: number; index: number }
   | { group: "dead"; index: number };
@@ -19,16 +20,16 @@ export default function OpponentSettings({
   const patch = (value: Partial<Draft>) =>
     dispatch({ type: "patch", patch: value });
   return (
-    <section className={s.section}>
-      <div className={s.sectionHeading}>
+    <section className={ui.section}>
+      <div className={ui.sectionHeading}>
         <h3>对手信息与范围</h3>
-        <span className={s.sectionMeta}>
+        <span className={ui.sectionMeta}>
           {draft.opponents.filter((o) => !o.folded).length} 名在局对手 ·{" "}
           {draft.opponents.length + 1} 人桌
         </span>
       </div>
       <details
-        className={s.optionalSettings}
+        className={ui.optionalSettings}
         open={
           draft.opponents.some((o) => o.kind !== "random") ||
           draft.deadCards.length > 0 ||
@@ -107,7 +108,7 @@ export default function OpponentSettings({
                 />
               )}
               {opponent.kind === "exact" && (
-                <div className={`${s.cards} ${s.opponentCards}`}>
+                <div className={`${ui.cards} ${s.opponentCards}`}>
                   {opponent.cards.map((card, index) => (
                     <Card
                       key={index}
@@ -141,14 +142,14 @@ export default function OpponentSettings({
           <summary>
             已知死牌 <span>{draft.deadCards.length} 张</span>
           </summary>
-          <p className={s.helper}>
+          <p className={ui.helper}>
             仅添加明确知道且不会再出现的牌。未知弃牌无需填写。
           </p>
           <div className={s.deadCards}>
             {draft.deadCards.map((card) => (
               <button
                 key={card}
-                className={card % 2 === 1 ? s.red : ""}
+                className={card % 2 === 1 ? ui.red : ""}
                 onClick={() =>
                   patch({
                     deadCards: draft.deadCards.filter((v) => v !== card),

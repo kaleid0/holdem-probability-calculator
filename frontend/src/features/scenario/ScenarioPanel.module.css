@@ -1,0 +1,236 @@
+.panelHeading {
+  padding: 21px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.panelHeading h2 {
+  font-size: 19px;
+  font-weight: 650;
+  margin: 5px 0 0;
+}
+.exampleButton {
+  min-height: 40px;
+  border: 1px solid var(--line);
+  background: var(--surface-subtle);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.exampleButton:hover {
+  border-color: #a6c5b7;
+  color: var(--green);
+  background: var(--green-light);
+}
+.heroRow {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.handSummary {
+  font-size: 13px;
+  color: var(--muted);
+}
+.handBadge {
+  display: inline-flex;
+  padding: 3px 8px;
+  border-radius: 5px;
+  background: var(--green-light);
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 500;
+}
+.handSummary p {
+  margin: 9px 0 3px;
+  color: var(--text);
+}
+.segmented {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 18px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-subtle);
+}
+.segmented button {
+  flex: 1;
+  min-height: 42px;
+  padding: 8px 3px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+}
+.segmented button small {
+  margin-left: 5px;
+  font-size: 10px;
+}
+.segmented .segmentActive {
+  border-color: #d9e5dd;
+  background: var(--surface);
+  color: var(--green);
+  font-weight: 600;
+  box-shadow: 0 1px 3px #173f3408;
+}
+.boardCards {
+  gap: 9px;
+}
+.moneyGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+}
+.moneyGrid label {
+  font-size: 12px;
+  color: var(--muted);
+}
+.moneyGrid label > div {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+  padding-right: 12px;
+  border: 1px solid #d6e1da;
+  background: var(--surface-subtle);
+  border-radius: 9px;
+}
+.moneyGrid label:focus-within > div {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px #176b540c;
+}
+.moneyGrid input {
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  padding: 10px 12px;
+  font-size: 22px;
+  font-weight: 550;
+  font-variant-numeric: tabular-nums;
+}
+.moneyGrid small {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 14px;
+  min-height: 36px;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.checkbox input {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  flex-shrink: 0;
+}
+.calculateDock {
+  display: flex;
+  gap: 10px;
+}
+.mobileResultButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-shrink: 0;
+  min-height: 50px;
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--control-radius);
+  background: var(--surface-subtle);
+  color: var(--green);
+  font-size: 13px;
+}
+@media (max-width: 1100px) and (min-width: 801px) {
+  .panelHeading {
+    padding-inline: 18px;
+  }
+  .heroRow {
+    gap: 18px;
+  }
+  .boardCards {
+    gap: 7px;
+  }
+}
+@media (max-width: 540px) {
+  .panelHeading {
+    padding: 18px;
+  }
+  .panelHeading h2 {
+    font-size: 18px;
+  }
+  .exampleButton {
+    font-size: 12px;
+    min-height: 44px;
+    padding-inline: 9px;
+  }
+  .heroRow {
+    gap: 21px;
+  }
+  .handSummary {
+    font-size: 12px;
+  }
+  .boardCards {
+    gap: 8px;
+  }
+  .segmented button {
+    min-height: 44px;
+    font-size: 12px;
+  }
+  .segmented button small {
+    font-size: 9px;
+    margin-left: 3px;
+  }
+  .moneyGrid {
+    gap: 10px;
+  }
+  .moneyGrid input {
+    font-size: 21px;
+  }
+  .checkbox {
+    font-size: 12px;
+  }
+  .calculateDock {
+    align-items: center;
+    padding-block: 12px;
+  }
+  .mobileResultButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 72px;
+    min-height: 50px;
+    padding: 4px;
+    border: 1px solid var(--line);
+    border-radius: var(--control-radius);
+    background: var(--surface-subtle);
+    color: var(--green);
+    font-size: 11px;
+  }
+  .mobileResultButton span {
+    font-size: 18px;
+    line-height: 1.2;
+  }
+}
+@media (max-width: 360px) {
+  .handSummary {
+    display: none;
+  }
+  .segmented button small {
+    display: none;
+  }
+}

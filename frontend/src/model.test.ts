@@ -77,13 +77,13 @@ describe("scenario contracts", () => {
     const original = exampleDraft();
     expect(
       sessionReducer(
-        { draft: original, game: null, history: [] },
+        { draft: original, game: null, history: [], mode: "snapshot" },
         { type: "patch", patch: { pot: "300" } },
       ).draft,
     ).toEqual({ ...original, pot: "300" });
     expect(
       sessionReducer(
-        { draft: original, game: null, history: [] },
+        { draft: original, game: null, history: [], mode: "snapshot" },
         { type: "replace", draft: emptyDraft() },
       ).draft,
     ).toEqual(emptyDraft());

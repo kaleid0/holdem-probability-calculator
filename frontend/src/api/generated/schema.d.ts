@@ -151,6 +151,12 @@ export interface components {
             call_amount: number;
             /** Dead Cards */
             dead_cards?: number[];
+            /**
+             * Equity Method
+             * @default auto
+             * @enum {string}
+             */
+            equity_method: "auto" | "monteCarlo";
             /** Hero */
             hero: [
                 number,

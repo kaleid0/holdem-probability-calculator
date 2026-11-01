@@ -92,6 +92,15 @@
             "title": "Dead Cards",
             "type": "array"
           },
+          "equity_method": {
+            "default": "auto",
+            "enum": [
+              "auto",
+              "monteCarlo"
+            ],
+            "title": "Equity Method",
+            "type": "string"
+          },
           "hero": {
             "maxItems": 2,
             "minItems": 2,

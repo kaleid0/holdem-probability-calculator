@@ -1,0 +1,313 @@
+.liveBadge i {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #8b9e97;
+}
+.eyebrow {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+}
+.inputPanel,
+.resultPanel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.inputPanel {
+  overflow: hidden;
+}
+.section {
+  padding: 22px 24px;
+  border-bottom: 1px solid var(--line);
+}
+.sectionHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.sectionHeading h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+.sectionHeading h3 > span {
+  color: #849990;
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.sectionMeta {
+  font-size: 11px;
+  color: var(--muted);
+}
+.cards {
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+}
+.red {
+  color: var(--red);
+}
+.helper {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.75;
+  margin: 10px 0 0;
+}
+.caution {
+  border: 1px solid #ecdfbe;
+  background: #fff9eb;
+  color: #8a662c;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 12px 0 0;
+}
+.inputPanel > .caution {
+  margin: 14px 24px 0;
+}
+.inputActions {
+  padding: 20px 24px 14px;
+}
+.calculateButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 50px;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: var(--control-radius);
+  background: var(--green);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 550;
+  box-shadow: 0 3px 7px #176b5412;
+}
+.calculateButton:hover:not(:disabled) {
+  background: var(--green-hover);
+}
+.calculateButton:disabled {
+  opacity: 0.65;
+}
+.calculateButton > span:last-child {
+  font-size: 21px;
+  font-weight: 400;
+}
+.optionalSettings {
+  color: var(--muted);
+  font-size: 12px;
+}
+.optionalSettings > summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-height: 48px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 13px;
+  color: var(--text);
+}
+.optionalSettings > summary::-webkit-details-marker {
+  display: none;
+}
+.optionalSettings > summary::after {
+  content: "⌄";
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1;
+}
+.optionalSettings[open] > summary::after {
+  transform: rotate(180deg);
+}
+.optionalSettings > summary > span {
+  color: var(--muted);
+  font-size: 11px;
+}
+.inputActions > .optionalSettings {
+  margin-top: 7px;
+}
+.scenarioTools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 8px;
+}
+.scenarioTools > span {
+  font-size: 11px;
+  color: var(--muted);
+}
+.scenarioTools > div {
+  display: flex;
+  gap: 8px;
+}
+.scenarioTools button {
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 0;
+  background: transparent;
+  color: var(--green);
+  font-size: 12px;
+  border-radius: 7px;
+}
+.scenarioTools button:hover {
+  background: var(--green-light);
+}
+.resultPanel {
+  padding: 22px 24px;
+  min-width: 0;
+  scroll-margin-top: 20px;
+}
+.resultPanel:has(> .section) {
+  padding: 0;
+}
+.resultPanel > .section {
+  border-bottom: 0;
+}
+.resultPanel > .section > .sectionHeading {
+  margin-bottom: 4px;
+}
+.resultPanel:has(> .optionalSettings) {
+  padding-block: 4px;
+}
+.liveBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 5px 9px;
+  background: var(--surface-subtle);
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.resultPanel[aria-busy="true"] .liveBadge {
+  background: var(--green-light);
+  color: var(--green);
+}
+.resultPanel[aria-busy="true"] .liveBadge i {
+  background: var(--green);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+.evBox {
+  margin: 14px 0 18px;
+  padding: 14px;
+  border: 1px solid #d7e7dc;
+  background: var(--green-light);
+  border-radius: 10px;
+}
+.evBox > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.evBox > div > span {
+  font-size: 12px;
+  color: var(--green);
+}
+.evBox b {
+  margin-left: 3px;
+  font-size: 10px;
+  font-weight: 500;
+}
+.evBox strong {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--green);
+  font-variant-numeric: tabular-nums;
+}
+.evBox strong.red {
+  color: var(--red);
+}
+.evBox strong small {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--muted);
+}
+.evBox p {
+  margin: 8px 0 0;
+  color: var(--green-hover);
+  font-size: 12px;
+  line-height: 1.8;
+}
+.optionalSettings[open] > .helper:last-child {
+  margin-bottom: 16px;
+}
+@media (max-width: 1100px) and (min-width: 801px) {
+  .section,
+  .inputActions,
+  .resultPanel {
+    padding-inline: 18px;
+  }
+}
+@media (max-width: 800px) {
+  .resultPanel {
+    scroll-margin-top: 16px;
+  }
+}
+@media (max-width: 540px) {
+  .section {
+    padding: 18px;
+  }
+  .sectionHeading {
+    margin-bottom: 14px;
+  }
+  .sectionHeading h3 {
+    font-size: 13px;
+  }
+  .sectionMeta {
+    font-size: 10px;
+  }
+  .helper,
+  .caution {
+    font-size: 12px;
+  }
+  .inputActions {
+    padding: 0 18px 6px;
+  }
+  .calculateButton {
+    flex: 1;
+    min-width: 0;
+    min-height: 50px;
+    font-size: 14px;
+  }
+  .resultPanel {
+    padding: 20px 18px 10px;
+  }
+  .resultPanel:has(> .optionalSettings) {
+    padding-block: 4px;
+  }
+  .evBox {
+    padding: 12px;
+  }
+}
+@media (max-width: 360px) {
+  .scenarioTools > span {
+    flex-basis: 100%;
+  }
+}

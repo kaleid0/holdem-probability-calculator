@@ -28,9 +28,11 @@ test("quick input keeps advanced controls collapsed and fills the board continuo
   await page.getByLabel("当前底池", { exact: true }).fill("150");
   await page.getByLabel("需要跟注", { exact: true }).fill("0");
   await page
-    .getByRole("button", { name: "计算当前牌局", exact: false })
+    .getByRole("button", { name: "精细分析当前牌局", exact: false })
     .click();
-  await expect(page.getByLabel("底池权益百分比")).toBeVisible();
+  await expect(
+    page.getByLabel("底池权益百分比", { exact: true }),
+  ).toBeVisible();
   await expect(page.getByRole("heading", { name: "策略对照" })).toHaveCount(0);
   expect(
     await page.evaluate(

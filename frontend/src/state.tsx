@@ -1,45 +1,59 @@
-import { createContext, useContext, useEffect, useReducer } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import type { Dispatch, ReactNode } from "react";
-import { emptyDraft, parseSaved } from "./model";
 import type { Draft } from "./model";
 import { sessionReducer } from "./session";
 import type { SessionAction, Session } from "./session";
+import { loadSession, saveSession } from "./sessionStorage";
 
-const storageKey = "holdem-lab:scenario:v3";
-function loadDraft(): Draft {
-  try {
-    const saved =
-      localStorage.getItem(storageKey) ??
-      localStorage.getItem("holdem-lab:scenario:v2") ??
-      localStorage.getItem("holdem-lab:scenario:v1");
-    return saved ? parseSaved(saved) : emptyDraft();
-  } catch {
-    return emptyDraft();
-  }
-}
 const ScenarioContext = createContext<{
   draft: Draft;
   game: Session["game"];
   history: Session["history"];
+  mode: Session["mode"];
   dispatch: Dispatch<SessionAction>;
 } | null>(null);
 export function ScenarioProvider({ children }: { children: ReactNode }) {
-  const [session, dispatch] = useReducer(
-    sessionReducer,
-    undefined,
-    (): Session => ({ draft: loadDraft(), game: null, history: [] }),
+  const [session, setSession] = useState(() =>
+    loadSession({
+      getItem: (key) => localStorage.getItem(key),
+    }),
   );
-  const { draft } = session;
+  const current = useRef(session);
+  const persist = useCallback((value: Session) => {
+    saveSession(
+      { setItem: (key, text) => localStorage.setItem(key, text) },
+      value,
+    );
+  }, []);
+  const dispatch = useCallback(
+    (action: SessionAction) => {
+      const next = sessionReducer(current.current, action);
+      current.current = next;
+      // Persist in the action handler: a phone may suspend before React's effects run.
+      persist(next);
+      setSession(next);
+    },
+    [persist],
+  );
   useEffect(() => {
-    try {
-      localStorage.setItem(
-        storageKey,
-        JSON.stringify({ schemaVersion: 3, draft }),
-      );
-    } catch {
-      /* Session remains usable when browser storage is unavailable. */
-    }
-  }, [draft]);
+    const flush = () => persist(current.current);
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") flush();
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("pagehide", flush);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("pagehide", flush);
+    };
+  }, [persist]);
   return (
     <ScenarioContext value={{ ...session, dispatch }}>
       {children}

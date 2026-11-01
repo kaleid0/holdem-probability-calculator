@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { components } from "./api/generated/schema";
 import { tableSchema } from "./table";
+import { bankrollSchema } from "./bankroll";
 
 export const ranks = "23456789TJQKA";
 export const suits = ["♠", "♥", "♣", "♦"] as const;
@@ -52,8 +53,17 @@ export const draftSchema = z
     strategyIds: z.array(z.string().min(1).max(100)).max(6).default([]),
     ruleMargin: z.number().min(0).max(0.5).default(0.05),
     table: tableSchema.optional(),
+    bankroll: bankrollSchema.optional(),
   })
-  .strict();
+  .strict()
+  .refine(
+    (draft) =>
+      !draft.bankroll ||
+      draft.bankroll.initial.length === draft.opponents.length + 1,
+    {
+      message: "筹码账本人数必须与牌桌人数一致",
+    },
+  );
 export type Draft = z.infer<typeof draftSchema>;
 
 export function emptyDraft(): Draft {
@@ -188,6 +198,7 @@ export function toRequest(
       config: id === "equity-rules" ? { equity_margin: draft.ruleMargin } : {},
     })),
     samples: draft.samples,
+    equity_method: "auto",
     seed: draft.seed,
   };
 }

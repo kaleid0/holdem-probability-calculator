@@ -101,7 +101,7 @@ def weighted_equity(
     remaining_count = len(deck) - 2 * len(ranges)
     per_assignment = state_count(remaining_count, random_count, missing)
     exact_count = (len(joint) if joint is not None else product_size) * per_assignment
-    exact = exact_count <= exact_limit
+    exact = request.equity_method == "auto" and exact_count <= exact_limit
     total = exact_count if exact else request.samples
     rng = random.Random(request.seed)
 

@@ -7,13 +7,11 @@ describe("API error recovery", () => {
   it("preserves status so expired tasks can stop polling", async () => {
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockResolvedValue(
-          new Response(JSON.stringify({ detail: "任务不存在" }), {
-            status: 404,
-          }),
-        ),
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ detail: "任务不存在" }), {
+          status: 404,
+        }),
+      ),
     );
     await expect(request("/api/v1/analyses/old")).rejects.toMatchObject({
       status: 404,
@@ -23,15 +21,13 @@ describe("API error recovery", () => {
   it("explains structured validation errors", async () => {
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockImplementation(() =>
-          Promise.resolve(
-            new Response(JSON.stringify({ detail: [{ msg: "重复牌" }] }), {
-              status: 422,
-            }),
-          ),
+      vi.fn().mockImplementation(() =>
+        Promise.resolve(
+          new Response(JSON.stringify({ detail: [{ msg: "重复牌" }] }), {
+            status: 422,
+          }),
         ),
+      ),
     );
     await expect(request("/api/v1/analyses")).rejects.toBeInstanceOf(ApiError);
     await expect(request("/api/v1/analyses")).rejects.toThrow("重复牌");

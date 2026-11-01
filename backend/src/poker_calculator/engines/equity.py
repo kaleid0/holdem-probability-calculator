@@ -94,7 +94,7 @@ def calculate_equity(
     random_count = sum(isinstance(p, RandomOpponent) for p in request.opponents)
     missing = 5 - len(request.board)
     exact_count = state_count(len(deck), random_count, missing)
-    exact = exact_count <= EXACT_LIMIT
+    exact = request.equity_method == "auto" and exact_count <= EXACT_LIMIT
     total = exact_count if exact else request.samples
     rng = random.Random(request.seed)
 

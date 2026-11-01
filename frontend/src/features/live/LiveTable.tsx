@@ -1,11 +1,22 @@
 import { useState } from "react";
 import type { ComponentProps, ComponentType } from "react";
-import type { Draft } from "./model";
-import { useScenario } from "./state";
-import { act, nextStreet, seatName, startGame, streetName } from "./liveGame";
-import type { LiveGame, Street } from "./liveGame";
-import type { Card, CardPicker } from "./App";
+import type { Draft } from "../../model";
+import { useScenario } from "../../state";
+import {
+  act,
+  gameLog,
+  nextStreet,
+  seatName,
+  startGame,
+  streetName,
+  remainingChips,
+  canRaise,
+} from "../../liveGame";
+import type { LiveGame, Street } from "../../liveGame";
+import type { Card } from "../../shared/cards/Card";
+import type { CardPicker } from "../../shared/cards/CardPicker";
 import s from "./LiveTable.module.css";
+import HandSettlement from "./HandSettlement";
 
 type Target = { group: "hero" | "board"; index: number };
 type Snapshot = { game: LiveGame; draft: Draft };
@@ -36,9 +47,6 @@ export default function LiveTable({
             底池<strong>{draft.pot}</strong>
           </div>
         </div>
-        <p className={s.note}>
-          当前手牌、公共牌和对手设置已保留，可切回局面录入继续分析。逐步记录需要完整的行动顺序；开始新一手后将从盲注开始记录。
-        </p>
         <div className={s.cards}>
           {draft.hero.map((card, i) => (
             <CardView key={i} value={card} label={`手牌 ${i + 1}`} />
@@ -55,12 +63,18 @@ export default function LiveTable({
       </section>
     );
   const game = recordedGame;
+  const log = gameLog(game);
   const state = { game, draft };
   const pot = game.total.reduce((a, b) => a + b, 0);
   const nextSize = (game.street === 0 ? 3 : game.street + 1) as Street;
-  const minimum = game.highest + game.minRaise;
-  const raiseTo = minimum + raiseExtra;
+  const available = remainingChips(game, game.actor);
+  const maximum = Number.isFinite(available)
+    ? game.paid[game.actor] + available
+    : game.highest + game.minRaise + 1000;
+  const minimum = Math.min(game.highest + game.minRaise, maximum);
+  const raiseTo = Math.min(minimum + raiseExtra, maximum);
   const due = game.highest - game.paid[game.actor];
+  const callAmount = Math.min(due, available);
   const dealSize = game.phase === "deal" ? nextSize : game.street;
   const heroReady = draft.hero.every((card) => card !== null);
   const boardReady = Array.from(
@@ -104,18 +118,20 @@ export default function LiveTable({
     <section className={s.table} aria-label="真实牌局">
       <div className={s.heading}>
         <div>
-          <span className={s.caption}>
-            {game.phase === "hand"
-              ? "准备牌局"
-              : `${remaining} 人在局 · 盲注 ${game.smallBlind} / ${game.bigBlind}`}
-          </span>
-          <h2>
-            {game.phase === "hand"
-              ? "先选好自己的手牌"
-              : game.phase === "finished"
-                ? "本手结束"
-                : `${streetName(game.street)} · ${game.phase === "deal" ? "等待发公共牌" : `${seatName(game.actor)} 行动`}`}
-          </h2>
+          {game.phase === "hand" ? (
+            <h2 className={s.preparationTitle}>准备牌局</h2>
+          ) : (
+            <>
+              <span className={s.caption}>
+                {remaining} 人在局 · 盲注 {game.smallBlind} / {game.bigBlind}
+              </span>
+              <h2>
+                {game.phase === "finished"
+                  ? "本手结束"
+                  : `${streetName(game.street)} · ${game.phase === "deal" ? "等待发公共牌" : `${seatName(game.actor)} 行动`}`}
+              </h2>
+            </>
+          )}
         </div>
         <div className={s.pot}>
           底池<strong>{pot}</strong>
@@ -185,34 +201,44 @@ export default function LiveTable({
           </div>
         )}
       </div>
-      {game.phase === "hand" && (
-        <button
-          className={s.primary}
-          disabled={!heroReady}
-          onClick={() => save({ game: startGame(game), draft })}
-        >
-          开始牌局 →
-        </button>
-      )}
+      {game.phase === "hand" &&
+        (game.folded.filter((f) => !f).length < 2 ? (
+          <p className={s.note}>
+            仅剩一位玩家有筹码，本桌已结束。可在「局面录入」中重置牌局，重新设置初始筹码。
+          </p>
+        ) : (
+          <button
+            className={s.primary}
+            disabled={!heroReady || game.folded.filter((f) => !f).length < 2}
+            onClick={() => save({ game: startGame(game), draft })}
+          >
+            开始牌局 →
+          </button>
+        ))}
       {game.phase === "deal" && (
         <button
           className={s.primary}
           disabled={!boardReady}
           onClick={() =>
             save({
-              game: nextStreet(game),
+              game: nextStreet(game, draft.board),
               draft: { ...draft, boardSize: nextSize },
             })
           }
         >
-          确认{streetName(nextSize)}，继续下注 →
+          确认{streetName(nextSize)}，
+          {game.folded.filter((f, i) => !f && remainingChips(game, i) > 0)
+            .length > 1
+            ? "继续下注"
+            : "继续发牌"}{" "}
+          →
         </button>
       )}
       {game.phase === "betting" && (
         <div className={s.actions}>
           <p className={s.actionHint}>
             {due
-              ? `已投入 ${game.paid[game.actor]}，再跟 ${due} 即可跟齐。`
+              ? `已投入 ${game.paid[game.actor]}，${callAmount < due ? `剩余 ${callAmount}，跟注将全下。` : `再跟 ${due} 即可跟齐。`}`
               : "无人加注，可以过牌。"}
             {game.folded[0] ? " 你已弃牌，可继续记录其他玩家。" : ""}
           </p>
@@ -227,11 +253,14 @@ export default function LiveTable({
               className={s.primary}
               onClick={() => save({ ...state, game: act(game, "call") })}
             >
-              {due ? `跟注 ${due}` : "过牌"}
+              {due
+                ? `${callAmount < due ? "全下跟注" : "跟注"} ${callAmount}`
+                : "过牌"}
             </button>
             <button
               aria-expanded={showRaise}
               aria-controls="live-raise"
+              disabled={!canRaise(game)}
               onClick={() => setShowRaise((value) => !value)}
             >
               {showRaise ? "收起" : game.highest ? "加注" : "下注"}
@@ -245,7 +274,7 @@ export default function LiveTable({
                 <input
                   type="range"
                   min={minimum}
-                  max={minimum + 1000}
+                  max={maximum}
                   step={1}
                   value={raiseTo}
                   onChange={(e) =>
@@ -273,33 +302,36 @@ export default function LiveTable({
               disabled={analyzing}
               onClick={analyze}
             >
-              {analyzing ? "正在计算…" : "分析我的当前决策 ↗"}
+              {analyzing ? "精细分析进行中…" : "精细分析当前决策 ↗"}
             </button>
           )}
         </div>
       )}
       {game.phase === "finished" && (
         <div className={s.finished}>
-          <h3>
-            {remaining === 1 ? game.log.at(-1) : "河牌下注完成，可以摊牌"}
-          </h3>
+          <h3>{remaining === 1 ? log.at(-1) : "河牌下注完成，可以摊牌"}</h3>
           {!game.folded[0] && remaining > 1 && (
             <button
               className={s.analyze}
               disabled={analyzing}
               onClick={analyze}
             >
-              分析摊牌权益 ↗
+              精细分析摊牌权益 ↗
             </button>
           )}
-          <button className={s.primary} onClick={newHand}>
+          <HandSettlement key={game.events.length} game={game} />
+          <button
+            className={s.primary}
+            disabled={!!game.stacks && !game.payouts}
+            onClick={newHand}
+          >
             开始新一手 →
           </button>
         </div>
       )}
-      {game.log.length > 0 && (
+      {log.length > 0 && (
         <p className={s.lastAction} role="status">
-          {game.log.at(-1)}
+          {log.at(-1)}
         </p>
       )}
       <div className={s.toolbar}>
@@ -317,7 +349,7 @@ export default function LiveTable({
           撤销上一步
         </button>
         {game.phase !== "hand" && game.phase !== "finished" && (
-          <button onClick={newHand}>新一手</button>
+          <button onClick={newHand}>放弃本手并重开</button>
         )}
       </div>
       <details className={s.details}>
@@ -334,6 +366,8 @@ export default function LiveTable({
                 {seatName(i)} {i === game.dealer ? "D" : ""}
               </strong>
               <span>
+                {game.stacks &&
+                  `剩余 ${remainingChips(game, i) + (game.payouts?.[i] ?? 0)} · `}
                 {game.folded[i]
                   ? `已弃牌 · 投入 ${total}`
                   : `本轮 ${game.paid[i]} · 累计 ${total}`}
@@ -341,16 +375,18 @@ export default function LiveTable({
             </div>
           ))}
         </div>
-        {game.log.length > 0 && (
+        {log.length > 0 && (
           <ol className={s.history}>
-            {game.log.map((entry, i) => (
+            {log.map((entry, i) => (
               <li key={i}>{entry}</li>
             ))}
           </ol>
         )}
-        <p className={s.note}>
-          单底池 · 不含全下与边池；对手手牌与范围使用共同分析设置。
-        </p>
+        {!game.historyComplete && (
+          <p className={s.note}>
+            旧版行动仅保留文字，结构化行动序列从升级后开始记录。
+          </p>
+        )}
       </details>
       {picker && (
         <Picker

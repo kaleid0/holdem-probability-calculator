@@ -1,5 +1,6 @@
-import type { components } from "./api/generated/schema";
-import s from "./App.module.css";
+import type { components } from "../../api/generated/schema";
+import s from "./Analysis.module.css";
+import ui from "../../shared/ui/Shared.module.css";
 type Outcome = components["schemas"]["StrategyOutcome"];
 const statuses = {
   ok: "已完成",
@@ -26,7 +27,7 @@ export default function Comparison({
   return (
     <div className={s.comparison}>
       <h3>策略对照</h3>
-      <p className={s.helper}>
+      <p className={ui.helper}>
         固定同一牌局和对手模型。共享权益计算，参考 EV
         口径相同；不对启发式偏好作收益排名。
       </p>

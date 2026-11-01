@@ -1,0 +1,415 @@
+.resultHeading h2 {
+  font-size: 19px;
+  font-weight: 650;
+  margin: 5px 0 0;
+}
+.stale {
+  border: 1px solid #ecdfbe;
+  background: #fff9eb;
+  color: #8a662c;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 12px 0 0;
+}
+.resultHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.taskProgress {
+  margin-top: 18px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-subtle);
+  color: var(--muted);
+}
+.taskProgress > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+.taskProgress button {
+  min-height: 38px;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--green);
+  font-size: 12px;
+}
+.taskProgress progress {
+  display: block;
+  width: 100%;
+  height: 5px;
+  margin: 10px 0;
+  border: 0;
+  border-radius: 6px;
+  accent-color: var(--green);
+  overflow: hidden;
+}
+.taskProgress progress::-webkit-progress-bar {
+  border-radius: 6px;
+  background: #dce7df;
+}
+.taskProgress progress::-webkit-progress-value {
+  border-radius: 6px;
+  background: var(--green);
+}
+.taskProgress progress::-moz-progress-bar {
+  background: var(--green);
+}
+.taskProgress small,
+.taskProgress > p {
+  font-size: 12px;
+  line-height: 1.7;
+}
+.equityArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 25px 0 19px;
+}
+.equityRing {
+  width: 182px;
+  height: 182px;
+  padding: 7px;
+  border-radius: 50%;
+  background: conic-gradient(var(--green) var(--equity), #eaf0ec 0);
+  box-shadow: 0 0 0 6px #f7faf8;
+  transform: rotate(-90deg);
+}
+.equityRing > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--surface);
+  transform: rotate(90deg);
+}
+.equityRing span:first-child {
+  font-size: 12px;
+  color: var(--muted);
+}
+.equityRing strong {
+  font-size: 37px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--green);
+  font-variant-numeric: tabular-nums;
+}
+.equityRing strong small {
+  font-size: 16px;
+  margin-left: 3px;
+}
+.equityRing span:last-child {
+  font-size: 10px;
+  color: var(--muted);
+}
+.equityCaption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 7px 9px;
+  margin-top: 20px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.equityCaption > span:last-child:not(:nth-child(2)) {
+  flex-basis: 100%;
+}
+.methodBadge {
+  border: 1px solid #d8e7dd;
+  border-radius: 5px;
+  padding: 3px 7px;
+  background: var(--green-light);
+  color: var(--green);
+  font-size: 10px;
+}
+.noEquity {
+  text-align: center;
+  padding: 27px 12px;
+  color: var(--muted);
+}
+.noEquity > span {
+  font:
+    36px Georgia,
+    serif;
+  color: var(--green);
+}
+.noEquity p {
+  font-size: 14px;
+}
+.noEquity small {
+  font-size: 12px;
+}
+.probabilities {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  padding: 17px 0 13px;
+}
+.probabilities > div {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.probabilities > div + div {
+  border-left: 1px solid var(--line);
+  padding-left: 14px;
+}
+.probabilities span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.probabilities i {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.probabilities strong {
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+}
+.probabilityBar {
+  display: flex;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 8px;
+  gap: 2px;
+}
+.probabilityBar span {
+  min-width: 0;
+}
+.win {
+  background: var(--green);
+}
+.tie {
+  background: #c9ab68;
+}
+.loss {
+  background: #c6d5cc;
+}
+.resultHint {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin: 10px 0 18px;
+}
+.oddsGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+}
+.oddsGrid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 13px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.oddsGrid span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.oddsGrid strong {
+  font-size: 23px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+  overflow-wrap: anywhere;
+}
+.oddsGrid small {
+  font-size: 10px;
+  color: var(--muted);
+}
+.assumptions {
+  border-top: 1px solid var(--line);
+}
+.assumptions summary {
+  min-height: 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+  color: var(--muted);
+  font-size: 12px;
+}
+.assumptions summary::-webkit-details-marker {
+  display: none;
+}
+.assumptions summary span {
+  font-size: 18px;
+}
+.assumptions[open] summary span {
+  transform: rotate(45deg);
+}
+.assumptions ul {
+  margin: 0 0 10px;
+  padding-left: 18px;
+}
+.assumptions li,
+.assumptions p {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.assumptions p {
+  margin: 0;
+}
+.comparison {
+  margin: 18px 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-subtle);
+}
+.comparison h3,
+.signals h3,
+.candidates h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.comparison article {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+  margin-top: 14px;
+  font-size: 12px;
+}
+.comparison article > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.comparison article p {
+  color: var(--muted);
+  line-height: 1.8;
+}
+.comparison button {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid #cadcd1;
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--green);
+  font-size: 12px;
+}
+.comparison button[aria-pressed="true"] {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+.signals,
+.candidates {
+  margin: 18px 0;
+  font-size: 12px;
+  line-height: 1.8;
+}
+.signals ul {
+  padding-left: 18px;
+  color: var(--muted);
+}
+.candidates table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.candidates td,
+.candidates th {
+  padding: 9px 6px;
+  border-bottom: 1px solid var(--line);
+  font-weight: 400;
+  text-align: left;
+}
+.candidates th {
+  color: var(--muted);
+  font-size: 11px;
+}
+@media (max-width: 1100px) and (min-width: 801px) {
+  .probabilities strong {
+    font-size: 19px;
+  }
+  .probabilities > div + div {
+    padding-left: 10px;
+  }
+}
+@media (max-width: 540px) {
+  .resultHeading h2 {
+    font-size: 18px;
+  }
+  .equityArea {
+    padding-top: 22px;
+  }
+  .equityRing {
+    width: 166px;
+    height: 166px;
+    padding: 6px;
+  }
+  .equityRing strong {
+    font-size: 35px;
+  }
+  .equityCaption {
+    font-size: 10px;
+  }
+  .probabilities strong {
+    font-size: 20px;
+  }
+  .probabilities > div + div {
+    padding-left: 10px;
+  }
+  .oddsGrid > div {
+    padding: 11px;
+  }
+  .oddsGrid strong {
+    font-size: 22px;
+  }
+}
+@media (max-width: 360px) {
+  .probabilities strong {
+    font-size: 18px;
+  }
+}
+.quickHeading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 12px;
+}
+.quickHeading h3 {
+  margin: 0;
+  font-size: 17px;
+}
+.quickHeading > span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.fineAnalysis {
+  border-top: 1px solid var(--line);
+  padding-top: 24px;
+}

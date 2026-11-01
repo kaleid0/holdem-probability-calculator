@@ -89,6 +89,25 @@ def test_monte_carlo_reproducible_and_agrees_with_exact() -> None:
     assert first.equity_standard_error is not None
 
 
+@pytest.mark.parametrize(
+    "opponent",
+    [
+        {"kind": "exact", "cards": cards("Ks Kh")},
+        {"kind": "range", "text": "KsKh:0.75 TsTh:0.25"},
+    ],
+)
+def test_forced_monte_carlo_uses_full_budget_for_small_state_spaces(
+    opponent: dict[str, object],
+) -> None:
+    request = scenario(opponents=[opponent], samples=10_000, equity_method="monteCarlo")
+    result = calculate_equity(request)
+    assert result.method == "monteCarlo"
+    assert result.sample_count == 10_000
+    assert result.equity_standard_error is not None
+    assert result.win_probability + result.tie_probability + result.lose_probability == 1
+    assert calculate_equity(scenario(opponents=[opponent])).method == "exact"
+
+
 def test_zero_call_and_future_betting_assumption() -> None:
     request = scenario(call_amount=0)
     result = get_strategy("pot-odds").analyze(request, AnalysisServices())

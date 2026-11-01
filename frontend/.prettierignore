@@ -1,2 +1,7 @@
+node_modules/
 dist/
 src/api/generated/
+pnpm-lock.yaml
+*.tsbuildinfo
+playwright-report/
+test-results/

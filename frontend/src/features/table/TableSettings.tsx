@@ -1,27 +1,39 @@
 import { useState } from "react";
-import { useScenario } from "./state";
-import { tableFor } from "./session";
-import { tableSchema } from "./table";
-import { createGame, startGame, seatName } from "./liveGame";
+import { useScenario } from "../../state";
+import { tableFor } from "../../session";
+import { tableSchema } from "../../table";
+import { createGame, startGame, seatName, gameLog } from "../../liveGame";
 import s from "./TableSettings.module.css";
+import ChipLedger from "./ChipLedger";
+import { bankrollFor } from "../../bankroll";
 
 export default function TableSettings() {
   const { draft, game, dispatch } = useScenario();
   const table = tableFor(draft);
   const count = draft.opponents.length + 1;
-  const locked = !!game && game.phase !== "hand" && game.phase !== "finished";
-  const active =
-    1 +
-    draft.opponents.filter((o) => !o.folded).length -
-    (game?.folded[0] ? 1 : 0);
+  const book = bankrollFor(draft);
+  const locked =
+    !!game &&
+    game.phase !== "hand" &&
+    (game.phase !== "finished" || (!!game.stacks && !game.payouts));
+  const active = game
+    ? game.folded.filter((f) => !f).length
+    : 1 + draft.opponents.filter((o) => !o.folded).length;
   const preview = startGame(
-    createGame(count, table.dealer, table.smallBlind, table.bigBlind),
+    createGame(
+      count,
+      table.dealer,
+      table.smallBlind,
+      table.bigBlind,
+      book.balances,
+    ),
   );
   const [blindInput, setBlindInput] = useState<{
     small: string;
     big: string;
   } | null>(null);
   const [error, setError] = useState("");
+  const [expanded, setExpanded] = useState(true);
   const update = (nextCount = count, nextTable = table) => {
     dispatch({ type: "table", count: nextCount, table: nextTable });
     setBlindInput(null);
@@ -29,7 +41,10 @@ export default function TableSettings() {
   };
   return (
     <section className={s.panel} aria-label="共同牌桌设置">
-      <details open>
+      <details
+        open={expanded}
+        onToggle={(event) => setExpanded(event.currentTarget.open)}
+      >
         <summary>
           <strong>
             <span className={s.tableIcon} aria-hidden="true">
@@ -40,13 +55,18 @@ export default function TableSettings() {
           <span className={s.summaryPills}>
             <span>{count} 人桌</span>
             <span>{seatName(table.dealer)} 庄</span>
-            <span>{locked ? "本手已锁定" : "两种录入方式共用"}</span>
+            <span>
+              盲注 {table.smallBlind} / {table.bigBlind}
+            </span>
+            <span className={s.sharedHint}>
+              {locked ? "本手已锁定" : "两种录入方式共用"}
+            </span>
           </span>
         </summary>
         <div className={s.fields}>
           <fieldset
             className={s.countField}
-            disabled={locked}
+            disabled={locked || book.hands.length > 0}
             aria-label="牌桌人数"
           >
             <legend>
@@ -166,6 +186,7 @@ export default function TableSettings() {
             )}
           </fieldset>
         </div>
+        <ChipLedger key={`${count}:${book.initial.join(",")}`} />
         {error && (
           <p role="alert" className={s.error}>
             {error}
@@ -176,7 +197,7 @@ export default function TableSettings() {
           {count} 人坐席 · {active} 人在局。
           {locked
             ? "本手记录进行中；开始新一手后可修改牌桌。"
-            : `${preview.log.join(" · ")}；翻前 ${seatName(preview.actor)} 先行动。`}
+            : `${gameLog(preview).join(" · ")}；翻前 ${seatName(preview.actor)} 先行动。`}
         </p>
       </details>
     </section>

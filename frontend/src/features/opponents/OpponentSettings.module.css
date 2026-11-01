@@ -1,0 +1,100 @@
+.opponents {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.opponent {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-subtle);
+  padding: 0 12px;
+  min-width: 0;
+}
+.opponentLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 56px;
+}
+.opponentLine > label {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--muted);
+  min-height: 44px;
+}
+.opponentLine input {
+  width: 16px;
+  height: 16px;
+}
+.opponentLine > span {
+  font-size: 12px;
+  font-weight: 500;
+}
+.opponentLine i {
+  font-style: normal;
+  color: var(--muted);
+  font-size: 10px;
+  margin-right: 5px;
+}
+.opponentLine select {
+  max-width: 150px;
+  min-height: 44px;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  padding: 5px;
+  color: var(--green);
+  font-size: 13px;
+}
+.opponentCards {
+  padding: 6px 0 18px;
+}
+.deadDetails {
+  margin-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.deadDetails summary {
+  padding: 12px 0;
+  min-height: 44px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.deadDetails summary span {
+  float: right;
+}
+.deadCards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.deadCards button {
+  min-height: 44px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  font-family: Georgia, serif;
+}
+.deadCards button small {
+  margin-left: 4px;
+  color: var(--muted);
+}
+.deadCards .addDead {
+  border-style: dashed;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--green);
+}
+@media (max-width: 540px) {
+  .opponentLine select {
+    font-size: 16px;
+  }
+  .opponentLine select {
+    max-width: 160px;
+  }
+}

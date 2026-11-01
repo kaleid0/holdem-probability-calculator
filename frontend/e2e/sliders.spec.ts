@@ -1,3 +1,4 @@
+import { openTab } from "./workspace";
 import { test, expect } from "@playwright/test";
 
 test("range sliders are immediate, independent of preview API, and support rapid matrix edits", async ({
@@ -9,6 +10,7 @@ test("range sliders are immediate, independent of preview API, and support rapid
   });
   await page.goto("/");
   await page.getByRole("button", { name: "载入示例", exact: false }).click();
+  await openTab(page, "对手与范围");
   await page.getByText("指定对手手牌或范围", { exact: true }).click();
   await page.getByLabel("对手 1 手牌模式").selectOption("range");
   await expect(page.getByLabel("对手 1 的手牌范围")).not.toBeVisible();
@@ -48,10 +50,13 @@ test("range sliders are immediate, independent of preview API, and support rapid
     .press("End");
   await expect(page.getByText("共 330 组合", { exact: false })).toBeVisible();
   expect(previews).toEqual([]);
+  await openTab(page, "当前牌局");
   await page
-    .getByRole("button", { name: "计算当前牌局", exact: false })
+    .getByRole("button", { name: "精细分析当前牌局", exact: false })
     .click();
-  await expect(page.getByLabel("底池权益百分比")).toBeVisible();
+  await expect(
+    page.getByLabel("底池权益百分比", { exact: true }),
+  ).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({
     path: "../.local/range-sliders.png",
@@ -65,6 +70,7 @@ test("mobile range width can be dragged and precise edits retain their own weigh
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await page.getByRole("button", { name: "载入示例", exact: false }).click();
+  await openTab(page, "对手与范围");
   await page.getByText("指定对手手牌或范围", { exact: true }).click();
   await page.getByLabel("对手 1 手牌模式").selectOption("range");
   const slider = page.getByRole("slider", {
@@ -92,6 +98,7 @@ test("mobile range width can be dragged and precise edits retain their own weigh
     page.getByRole("button", { name: "TT 范围权重 25%", exact: true }),
   ).toBeEnabled();
   await page.reload();
+  await openTab(page, "对手与范围");
   await page.getByText("细分滑块 · 文本与精确输入", { exact: true }).click();
   await expect(page.getByLabel("对手 1 的手牌范围")).toHaveValue(
     "KsKh:0.75 TsTh:0.25",

@@ -5,7 +5,7 @@ import type { Session } from "./session";
 import { act, startGame } from "./liveGame";
 
 function initial(): Session {
-  return { draft: emptyDraft(), game: null, history: [] };
+  return { draft: emptyDraft(), game: null, history: [], mode: "snapshot" };
 }
 function prepared(): Session {
   let state = sessionReducer(initial(), {

@@ -1,17 +1,25 @@
 :root {
   font-family: "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-  color: #233c34;
-  background: #f4f3ed;
+  color: #1c3530;
+  background: #f3f6f5;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  --green: #173f34;
-  --green-light: #e8eee8;
-  --gold: #b28e47;
-  --muted: #778079;
-  --line: #e8e9e2;
-  --red: #b04f48;
+  --green: #176b54;
+  --green-hover: #10533f;
+  --green-light: #eaf4ef;
+  --gold: #93733c;
+  --text: #1c3530;
+  --muted: #667b74;
+  --line: #e1e9e5;
+  --red: #bd4b48;
+  --surface: #ffffff;
+  --surface-subtle: #f6f9f7;
+  --radius: 16px;
+  --control-radius: 10px;
+  --shadow: 0 4px 24px #173f3405;
+  --control-height: 44px;
 }
 * {
   box-sizing: border-box;
@@ -19,10 +27,12 @@
 body {
   margin: 0;
   min-width: 320px;
+  line-height: 1.5;
 }
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 button,
@@ -44,8 +54,8 @@ summary {
   -webkit-tap-highlight-color: transparent;
 }
 :focus-visible {
-  outline: 3px solid #b8954b;
-  outline-offset: 4px;
+  outline: 3px solid #348c72;
+  outline-offset: 3px;
 }
 button {
   touch-action: manipulation;
@@ -54,12 +64,24 @@ input,
 select {
   min-width: 0;
 }
+input[type="checkbox"] {
+  accent-color: var(--green);
+}
+button,
+input,
+select,
+textarea {
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
 a {
   color: inherit;
 }
 ::selection {
-  background: #dddfca;
-  color: #173f34;
+  background: #d6eadf;
+  color: #174b3b;
 }
 @media (prefers-reduced-motion: reduce) {
   *,

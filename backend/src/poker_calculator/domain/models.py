@@ -82,6 +82,7 @@ class AnalysisRequest(Contract):
     strategy_config: dict[str, Any] = Field(default_factory=dict)
     strategies: list[StrategySelection] | None = Field(default=None, min_length=1, max_length=6)
     samples: Annotated[int, Field(strict=True, ge=1_000, le=200_000)] = 20_000
+    equity_method: Literal["auto", "monteCarlo"] = "auto"
     seed: Annotated[int, Field(strict=True, ge=0, le=2**32 - 1)] = 42
 
     @model_validator(mode="after")

@@ -1,25 +1,31 @@
-import { useScenario } from "./state";
-import type { Strategy } from "./api/client";
-import type { Draft } from "./model";
-import s from "./App.module.css";
+import { useState } from "react";
+import { useScenario } from "../../state";
+import type { Strategy } from "../../api/client";
+import type { Draft } from "../../model";
+import s from "./AnalysisSettings.module.css";
+import ui from "../../shared/ui/Shared.module.css";
 
 export default function AnalysisSettings({
   strategies,
 }: {
   strategies: Strategy[];
 }) {
+  const [expanded, setExpanded] = useState(true);
   const { draft, dispatch } = useScenario();
   const patch = (value: Partial<Draft>) =>
     dispatch({ type: "patch", patch: value });
   return (
-    <section className={s.resultPanel} aria-label="共同分析设置">
-      <details className={s.optionalSettings}>
+    <section className={ui.resultPanel} aria-label="共同分析设置">
+      <details
+        className={ui.optionalSettings}
+        open={expanded}
+        onToggle={(event) => setExpanded(event.currentTarget.open)}
+      >
         <summary>
-          分析设置{" "}
-          <span>{draft.strategyIds.length} 项策略 · 两种录入方式共用</span>
+          分析设置 <span>精细分析 · {draft.strategyIds.length} 项策略</span>
         </summary>
         <fieldset className={s.strategyChoices}>
-          <legend>分析策略</legend>
+          <legend>精细分析策略</legend>
           {(strategies.length
             ? strategies
             : [
@@ -51,7 +57,7 @@ export default function AnalysisSettings({
           {draft.strategyIds
             .filter((id) => !strategies.some((s) => s.id === id))
             .map((id) => (
-              <p key={id} className={s.helper}>
+              <p key={id} className={ui.helper}>
                 已保存策略：{id}（尚未发现或已不可用）
               </p>
             ))}
@@ -77,7 +83,7 @@ export default function AnalysisSettings({
           )}
         </fieldset>
         <div className={s.computeSettings}>
-          <label htmlFor="shared-samples">模拟精度</label>
+          <label htmlFor="shared-samples">精细分析模拟精度</label>
           <select
             id="shared-samples"
             value={draft.samples}
@@ -90,8 +96,9 @@ export default function AnalysisSettings({
             <option value="100000">精细 · 100,000 次</option>
           </select>
         </div>
-        <p className={s.helper}>
-          两种录入方式使用相同假设。规则策略仅适用于跟注后直接摊牌，安全余量不改变数学
+        <p className={ui.helper}>
+          快速分析固定模拟 10,000
+          次；以上设置仅用于手动执行的精细分析。规则策略仅适用于跟注后直接摊牌，安全余量不改变数学
           EV。
         </p>
       </details>

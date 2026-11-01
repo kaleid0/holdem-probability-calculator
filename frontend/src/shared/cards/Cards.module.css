@@ -1,0 +1,353 @@
+.cardWrap {
+  width: 76px;
+  height: 104px;
+  position: relative;
+  flex-shrink: 0;
+}
+.card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border: 1px solid #cedbd3;
+  border-radius: 9px;
+  background: var(--surface);
+  box-shadow: 0 3px 5px #173f3408;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #243b34;
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease;
+}
+.card:hover:not(:disabled) {
+  border-color: var(--green);
+  transform: translateY(-2px);
+}
+.card:disabled {
+  cursor: default;
+}
+.emptyCard {
+  flex-direction: column;
+  gap: 7px;
+  background: var(--surface-subtle);
+  border: 1px dashed #bdcec4;
+  box-shadow: none;
+}
+.cardPlus {
+  color: #839d90;
+  font-size: 27px;
+  line-height: 1;
+  font-weight: 300;
+}
+.cardHint {
+  color: var(--muted);
+  font-size: 10px;
+  padding: 0 2px;
+}
+.corner {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 7px;
+  left: 8px;
+  text-align: center;
+  font:
+    21px/1.05 Georgia,
+    serif;
+}
+.corner small {
+  font-size: 11px;
+}
+.cardSuit {
+  margin-top: 9px;
+  font:
+    34px Georgia,
+    serif;
+}
+.cardBottom {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  transform: rotate(180deg);
+  font:
+    14px Georgia,
+    serif;
+}
+.card.redCard {
+  color: var(--red);
+}
+.removeCard {
+  position: absolute;
+  top: -11px;
+  right: -11px;
+  z-index: 1;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 5px solid var(--surface);
+  border-radius: 50%;
+  background: #edf2ef;
+  background-clip: padding-box;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1;
+}
+.removeCard:hover {
+  color: var(--red);
+  background-color: #fbeae7;
+}
+.smallCard {
+  width: 60px;
+  height: 84px;
+}
+.smallCard .corner {
+  left: 6px;
+  top: 5px;
+  font-size: 17px;
+}
+.smallCard .corner small {
+  font-size: 10px;
+}
+.smallCard .cardSuit {
+  font-size: 26px;
+}
+.smallCard .cardBottom {
+  right: 6px;
+  bottom: 5px;
+  font-size: 11px;
+}
+.textButton {
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 0;
+  background: transparent;
+  color: var(--green);
+  font-size: 12px;
+  border-radius: 7px;
+}
+.textButton:hover {
+  background: var(--green-light);
+}
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #142e2680;
+  backdrop-filter: blur(5px);
+  padding: 24px;
+}
+.picker {
+  width: min(820px, 100%);
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: 0 24px 90px #142e2633;
+}
+.pickerHeading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.pickerHeading h2 {
+  margin: 7px 0 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+.closeButton {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-subtle);
+  color: var(--muted);
+  font-size: 26px;
+}
+.suitTabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 20px;
+}
+.suitTab {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  font-size: 12px;
+}
+.suitTab span {
+  font:
+    23px Georgia,
+    serif;
+}
+.suitTab.activeSuit {
+  background: var(--green-light);
+  border-color: var(--green);
+  box-shadow: inset 0 0 0 1px var(--green);
+}
+.deck {
+  margin: 20px 0;
+}
+.rankScroller {
+  padding: 3px 1px;
+}
+.rankRow {
+  display: grid;
+  grid-template-columns: repeat(13, minmax(0, 1fr));
+  gap: 7px;
+}
+.deckCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  height: 65px;
+  min-width: 0;
+  padding: 3px;
+  border: 1px solid #d1ded5;
+  border-radius: 7px;
+  background: var(--surface);
+  font:
+    22px Georgia,
+    serif;
+}
+.deckCard small {
+  font-size: 15px;
+}
+.deckCard:hover:not(:disabled) {
+  background: var(--green-light);
+  border-color: var(--green);
+}
+.deckCard:disabled {
+  opacity: 0.3;
+  background: #edf1ee;
+}
+.deckCard.selectedCard {
+  background: var(--green-light);
+  border-color: var(--green);
+  box-shadow: inset 0 0 0 1px var(--green);
+}
+.pickerFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+.pickerFooter > span {
+  font-size: 11px;
+  color: var(--muted);
+}
+@media (max-width: 1100px) and (min-width: 801px) {
+  .smallCard {
+    width: 51px;
+    height: 73px;
+  }
+}
+@media (max-width: 800px) {
+  .rankRow {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+}
+@media (max-width: 540px) {
+  .cardWrap {
+    width: 68px;
+    height: 94px;
+  }
+  .smallCard {
+    width: clamp(40px, calc((100vw - 104px) / 5), 72px);
+    height: clamp(60px, calc((100vw - 104px) / 5 * 1.44), 104px);
+  }
+  .smallCard .corner {
+    left: 5px;
+    font-size: 16px;
+  }
+  .smallCard .cardSuit {
+    font-size: 24px;
+  }
+  .smallCard .cardHint {
+    font-size: 9px;
+  }
+  .modalBackdrop {
+    padding: 0;
+    align-items: flex-end;
+  }
+  .picker {
+    width: 100%;
+    max-height: calc(100dvh - 24px);
+    border-radius: 22px 22px 0 0;
+    padding: 21px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+  }
+  .pickerHeading h2 {
+    font-size: 17px;
+  }
+  .suitTabs {
+    margin-top: 16px;
+    gap: 7px;
+  }
+  .suitTab {
+    min-height: 52px;
+    flex-direction: column;
+    gap: 1px;
+    font-size: 11px;
+  }
+  .suitTab span {
+    font-size: 21px;
+    line-height: 1.1;
+  }
+  .deck {
+    margin: 16px 0;
+  }
+  .rankRow {
+    gap: 7px;
+  }
+  .deckCard {
+    height: 62px;
+    font-size: 21px;
+  }
+  .deckCard small {
+    font-size: 13px;
+  }
+  .pickerFooter > span {
+    max-width: 62%;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+}
+@media (max-width: 360px) {
+  .rankRow {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+@media (max-width: 340px) {
+  .rankRow {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+@media (pointer: coarse) {
+  .removeCard::after {
+    content: "";
+    position: absolute;
+    inset: -7px;
+  }
+}

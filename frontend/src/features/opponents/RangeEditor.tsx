@@ -8,8 +8,8 @@ import {
   parseRange,
   rangeStats,
   serializeCombos,
-} from "./ranges";
-import type { RangeCategory, WeightedPair } from "./ranges";
+} from "../../ranges";
+import type { RangeCategory, WeightedPair } from "../../ranges";
 import styles from "./RangeEditor.module.css";
 
 export default function RangeEditor({

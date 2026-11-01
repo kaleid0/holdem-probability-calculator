@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { act, createGame, nextStreet, startGame } from "./liveGame";
+import { act, createGame, gameLog, nextStreet, startGame } from "./liveGame";
 
 describe("live betting rounds", () => {
   it("posts blinds and preserves the big blind's option after calls", () => {
@@ -38,7 +38,7 @@ describe("live betting rounds", () => {
     game = act(game, "fold");
     expect(game.phase).toBe("finished");
     expect(game.total).toEqual([0, 5, 10]);
-    expect(game.log.at(-1)).toContain("赢得底池 15");
+    expect(gameLog(game).at(-1)).toContain("赢得底池 15");
   });
   it("uses the heads-up dealer as small blind and reverses postflop order", () => {
     let game = startGame(createGame(2, 0));
