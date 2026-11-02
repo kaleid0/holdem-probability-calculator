@@ -1,0 +1,240 @@
+{
+  "schema_version": 2,
+  "hero": [
+    48,
+    49
+  ],
+  "board": [
+    4,
+    9,
+    14,
+    19,
+    24
+  ],
+  "opponents": [
+    {
+      "kind": "random"
+    }
+  ],
+  "pot_before_call": 180,
+  "call_amount": 0,
+  "pot_context": {
+    "contributions": [
+      90,
+      90
+    ],
+    "folded_contributions": [],
+    "betting_closed_after_call": true
+  },
+  "settlement_assumption": "futureBettingPossible",
+  "samples": 1000,
+  "seed": 42,
+  "strategies": [
+    {
+      "id": "river-bet",
+      "config": {
+        "mode": "auto",
+        "opponent_seats": [
+          1
+        ],
+        "history_context": {
+          "schema_version": 1,
+          "hand_id": "example-auto-river-1",
+          "cutoff_sequence": 12,
+          "complete": true,
+          "count": 2,
+          "opening_seats": [
+            0,
+            1
+          ],
+          "dealer": 0,
+          "small_blind": 5,
+          "big_blind": 10,
+          "stacks": [
+            1000,
+            1000
+          ],
+          "events": [
+            {
+              "kind": "action",
+              "sequence": 1,
+              "street": 0,
+              "player": 0,
+              "action": "smallBlind",
+              "amount": 5,
+              "streetTotal": 5,
+              "totalCommitted": 5,
+              "toCall": 0,
+              "highestBefore": 0,
+              "minRaiseBefore": 10,
+              "potBefore": 0,
+              "potAfter": 5,
+              "activePlayersBefore": 2
+            },
+            {
+              "kind": "action",
+              "sequence": 2,
+              "street": 0,
+              "player": 1,
+              "action": "bigBlind",
+              "amount": 10,
+              "streetTotal": 10,
+              "totalCommitted": 10,
+              "toCall": 5,
+              "highestBefore": 5,
+              "minRaiseBefore": 10,
+              "potBefore": 5,
+              "potAfter": 15,
+              "activePlayersBefore": 2
+            },
+            {
+              "kind": "action",
+              "sequence": 3,
+              "street": 0,
+              "player": 0,
+              "action": "call",
+              "amount": 5,
+              "streetTotal": 10,
+              "totalCommitted": 10,
+              "toCall": 5,
+              "highestBefore": 10,
+              "minRaiseBefore": 10,
+              "potBefore": 15,
+              "potAfter": 20,
+              "activePlayersBefore": 2
+            },
+            {
+              "kind": "action",
+              "sequence": 4,
+              "street": 0,
+              "player": 1,
+              "action": "check",
+              "amount": 0,
+              "streetTotal": 10,
+              "totalCommitted": 10,
+              "toCall": 0,
+              "highestBefore": 10,
+              "minRaiseBefore": 10,
+              "potBefore": 20,
+              "potAfter": 20,
+              "activePlayersBefore": 2
+            },
+            {
+              "kind": "street",
+              "sequence": 5,
+              "street": 3,
+              "board": [
+                4,
+                9,
+                14
+              ]
+            },
+            {
+              "kind": "action",
+              "sequence": 6,
+              "street": 3,
+              "player": 1,
+              "action": "bet",
+              "amount": 20,
+              "streetTotal": 20,
+              "totalCommitted": 30,
+              "toCall": 0,
+              "highestBefore": 0,
+              "minRaiseBefore": 10,
+              "potBefore": 20,
+              "potAfter": 40,
+              "activePlayersBefore": 2
+            },
+            {
+              "kind": "action",
+              "sequence": 7,
+              "street": 3,
+              "player": 0,
+              "action": "call",
+              "amount": 20,
+              "streetTotal": 20,
+              "totalCommitted": 30,
+              "toCall": 20,
+              "highestBefore": 20,
+              "minRaiseBefore": 20,
+              "potBefore": 40,
+              "potAfter": 60,
+              "activePlayersBefore": 2
+            },
+            {
+              "kind": "street",
+              "sequence": 8,
+              "street": 4,
+              "board": [
+                4,
+                9,
+                14,
+                19
+              ]
+            },
+            {
+              "kind": "action",
+              "sequence": 9,
+              "street": 4,
+              "player": 1,
+              "action": "bet",
+              "amount": 60,
+              "streetTotal": 60,
+              "totalCommitted": 90,
+              "toCall": 0,
+              "highestBefore": 0,
+              "minRaiseBefore": 10,
+              "potBefore": 60,
+              "potAfter": 120,
+              "activePlayersBefore": 2
+            },
+            {
+              "kind": "action",
+              "sequence": 10,
+              "street": 4,
+              "player": 0,
+              "action": "call",
+              "amount": 60,
+              "streetTotal": 60,
+              "totalCommitted": 90,
+              "toCall": 60,
+              "highestBefore": 60,
+              "minRaiseBefore": 60,
+              "potBefore": 120,
+              "potAfter": 180,
+              "activePlayersBefore": 2
+            },
+            {
+              "kind": "street",
+              "sequence": 11,
+              "street": 5,
+              "board": [
+                4,
+                9,
+                14,
+                19,
+                24
+              ]
+            },
+            {
+              "kind": "action",
+              "sequence": 12,
+              "street": 5,
+              "player": 1,
+              "action": "check",
+              "amount": 0,
+              "streetTotal": 0,
+              "totalCommitted": 90,
+              "toCall": 0,
+              "highestBefore": 0,
+              "minRaiseBefore": 10,
+              "potBefore": 180,
+              "potAfter": 180,
+              "activePlayersBefore": 2
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

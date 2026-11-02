@@ -88,3 +88,23 @@ def test_queue_bound_and_result_expiry() -> None:
         assert service.get(task.id).status == "expired"
     finally:
         service.close()
+
+
+def test_side_pot_contract_through_worker(client: TestClient) -> None:
+    payload = {
+        **PAYLOAD,
+        "hero": [44, 45],
+        "opponents": [{"kind": "exact", "cards": [48, 49]}, {"kind": "exact", "cards": [40, 41]}],
+        "pot_before_call": 400,
+        "call_amount": 100,
+        "pot_context": {"contributions": [100, 100, 200], "betting_closed_after_call": True},
+    }
+    submitted = client.post("/api/v1/analyses", json=payload)
+    assert submitted.status_code == 202
+    result = wait_until_done(client, submitted.json()["task_id"])["result"]
+    assert isinstance(result, dict)
+    assert result["expected_return"] == 200
+    assert result["call_ev"] == 100
+    assert len(result["pots"]) == 2
+    payload["pot_context"] = {"contributions": [1, 2, 3]}
+    assert client.post("/api/v1/analyses", json=payload).status_code == 422

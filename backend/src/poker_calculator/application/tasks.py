@@ -15,7 +15,12 @@ from poker_calculator.domain.models import (
     TaskSnapshot,
     TaskStatus,
 )
-from poker_calculator.infrastructure.compute import execute_analysis
+from poker_calculator.domain.sensitivity import (
+    SensitivityRequest,
+    SensitivityResult,
+    SensitivityTaskSnapshot,
+)
+from poker_calculator.infrastructure.compute import execute_analysis, execute_sensitivity
 
 
 class QueueFullError(Exception):
@@ -34,6 +39,8 @@ class Task:
     finished_at: float | None = None
     outcomes: list[StrategyOutcome] = field(default_factory=list)
     completion: Literal["complete", "partial", "none"] = "none"
+    kind: Literal["analysis", "sensitivity"] = "analysis"
+    sensitivity_result: SensitivityResult | None = None
 
 
 class TaskService:
@@ -63,6 +70,7 @@ class TaskService:
             if time.monotonic() - task.finished_at > self.ttl_seconds:
                 task.status = "expired"
                 task.result = None
+                task.sensitivity_result = None
                 task.outcomes = []
                 task.completion = "none"
                 task.error = "任务结果已过期，请重新计算"
@@ -73,6 +81,10 @@ class TaskService:
             else:
                 try:
                     output = task.future.result()
+                    if output.get("sensitivity_result"):
+                        task.sensitivity_result = SensitivityResult.model_validate(
+                            output["sensitivity_result"]
+                        )
                     task.outcomes = [
                         StrategyOutcome.model_validate(item) for item in output.get("outcomes", [])
                     ]
@@ -81,10 +93,12 @@ class TaskService:
                         task.result = AnalysisResult.model_validate(output["result"])
                     if output.get("cancelled") or task.status == "cancelling":
                         task.status = "cancelled"
-                    elif task.result is None:
+                    elif task.result is None and (
+                        task.sensitivity_result is None or task.completion == "none"
+                    ):
                         task.status = "failed"
                         task.error = (
-                            output.get("budget_error") or "所有策略均未产生结果，请查看各策略原因"
+                            output.get("budget_error") or "未产生可用计算结果，请查看各项原因"
                         )
                     else:
                         task.status = "succeeded"
@@ -105,22 +119,35 @@ class TaskService:
             if task.finished_at is not None and now - task.finished_at > self.ttl_seconds * 2:
                 del self.tasks[task_id]
 
-    def submit(self, request: AnalysisRequest) -> Task:
+    def submit(self, request: AnalysisRequest | SensitivityRequest) -> Task:
         self._prune()
         if sum(task.finished_at is None for task in self.tasks.values()) >= self.max_tasks:
             raise QueueFullError("计算队列已满，请稍后重试")
-        progress = self.manager.dict({"started": False, "completed": 0, "total": request.samples})
+        sensitivity = isinstance(request, SensitivityRequest)
+        samples = (
+            request.base_analysis.samples
+            if isinstance(request, SensitivityRequest)
+            else request.samples
+        )
+        progress = self.manager.dict({"started": False, "completed": 0, "total": samples})
         cancellation = self.manager.Event()
         future = self.executor.submit(
-            execute_analysis, request.model_dump(), progress, cancellation, self.time_limit
+            execute_sensitivity if sensitivity else execute_analysis,
+            request.model_dump(),
+            progress,
+            cancellation,
+            self.time_limit,
         )
         task = Task(uuid.uuid4().hex, future, progress, cancellation)
+        task.kind = "sensitivity" if sensitivity else "analysis"
         self.tasks[task.id] = task
         return task
 
     def get(self, task_id: str) -> TaskSnapshot:
         self._prune()
         task = self.tasks[task_id]
+        if task.kind != "analysis":
+            raise KeyError(task_id)
         completed = int(task.progress.get("completed", 0))
         total = int(task.progress.get("total", 0))
         fraction = completed / total if total else 0.0
@@ -138,7 +165,35 @@ class TaskService:
             completion=task.completion,
         )
 
+    def get_sensitivity(self, task_id: str) -> SensitivityTaskSnapshot:
+        self._prune()
+        task = self.tasks[task_id]
+        if task.kind != "sensitivity":
+            raise KeyError(task_id)
+        total = int(task.progress.get("total", 0))
+        completed = int(task.progress.get("completed", 0))
+        return SensitivityTaskSnapshot(
+            task_id=task.id,
+            status=task.status,
+            progress=min(1.0, completed / total) if total else 0,
+            result=task.sensitivity_result,
+            error=task.error,
+            completion=task.completion,
+        )
+
+    def cancel_sensitivity(self, task_id: str) -> SensitivityTaskSnapshot:
+        if self.tasks[task_id].kind != "sensitivity":
+            raise KeyError(task_id)
+        self._cancel(task_id)
+        return self.get_sensitivity(task_id)
+
     def cancel(self, task_id: str) -> TaskSnapshot:
+        if self.tasks[task_id].kind != "analysis":
+            raise KeyError(task_id)
+        self._cancel(task_id)
+        return self.get(task_id)
+
+    def _cancel(self, task_id: str) -> None:
         task = self.tasks[task_id]
         self._refresh(task)
         if task.finished_at is None:
@@ -148,7 +203,6 @@ class TaskService:
                 task.finished_at = time.monotonic()
             else:
                 task.status = "cancelling"
-        return self.get(task_id)
 
     def close(self) -> None:
         for task in self.tasks.values():

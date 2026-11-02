@@ -249,7 +249,7 @@ export default function RangeEditor({
           }}
           placeholder="TT+, AJs+, KQo:0.5, AsKh:0.25"
           spellCheck={false}
-          maxLength={12000}
+          maxLength={65536}
         />
         <p className={styles.hint}>
           支持 AA、AKs、AKo、TT+、AJs-AKs 和具体 AsKh；:0.5 表示组合权重

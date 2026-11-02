@@ -16,6 +16,7 @@ from poker_calculator.engines.equity import (
     state_count,
 )
 from poker_calculator.engines.evaluator import evaluate
+from poker_calculator.engines.pots import PotAccumulator
 
 
 def weighted_equity(
@@ -168,6 +169,7 @@ def weighted_equity(
             accepted += 1
             yield opponents, tuple(drawn[cursor:]), 1.0
 
+    pots = PotAccumulator(request)
     wins = ties = losses = shares = squares = mass = 0.0
     completed = 0
     if progress:
@@ -193,6 +195,9 @@ def weighted_equity(
                 ties += weight
         else:
             losses += weight
+        pot_share = pots.add(scores, weight)
+        if pot_share is not None:
+            share = pot_share
         mass += weight
         shares += weight * share
         squares += weight * share * share
@@ -209,6 +214,7 @@ def weighted_equity(
     if progress:
         progress(completed, total)
     return EquityResult(
+        pots=tuple(pots.results()),
         method="exact" if exact else "monteCarlo",
         win_probability=wins / mass,
         tie_probability=ties / mass,

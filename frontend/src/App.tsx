@@ -22,7 +22,7 @@ import WorkspacePanel from "./app/WorkspacePanel";
 import w from "./app/Workspace.module.css";
 
 export default function App() {
-  const { draft, dispatch, mode } = useScenario();
+  const { draft, game, dispatch, mode } = useScenario();
   const setMode = (mode: "snapshot" | "live") =>
     dispatch({ type: "mode", mode });
   const [activePanel, setActivePanel] = useState<WorkspaceTab>("scenario");
@@ -171,6 +171,7 @@ export default function App() {
               </div>
               <div hidden={mode !== "live"}>
                 <LiveTable
+                  key={game ? "recorded" : "unrecorded"}
                   CardView={Card}
                   Picker={CardPicker}
                   analyzing={busy}

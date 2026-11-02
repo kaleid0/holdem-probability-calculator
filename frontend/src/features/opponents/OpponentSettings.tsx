@@ -92,20 +92,32 @@ export default function OpponentSettings({
                 </select>
               </div>
               {opponent.kind === "range" && (
-                <RangeEditor
-                  value={opponent.text}
-                  player={player}
-                  knownCards={usedCards(draft)}
-                  onChange={(text) =>
-                    patch({
-                      opponents: draft.opponents.map((item, index) =>
-                        index === player
-                          ? { ...item, kind: "range", text }
-                          : item,
-                      ),
-                    })
-                  }
-                />
+                <>
+                  {opponent.rangeSource === "current" && (
+                    <p className={ui.helper}>
+                      此范围来自敏感性分析，表示当前后验范围。不要将它作为同一手牌的翻前先验。
+                    </p>
+                  )}
+                  <RangeEditor
+                    value={opponent.text}
+                    player={player}
+                    knownCards={usedCards(draft)}
+                    onChange={(text) =>
+                      patch({
+                        opponents: draft.opponents.map((item, index) =>
+                          index === player
+                            ? {
+                                ...item,
+                                kind: "range",
+                                text,
+                                rangeSource: "manual",
+                              }
+                            : item,
+                        ),
+                      })
+                    }
+                  />
+                </>
               )}
               {opponent.kind === "exact" && (
                 <div className={`${ui.cards} ${s.opponentCards}`}>

@@ -15,6 +15,7 @@ from poker_calculator.domain.models import (
     WeightedCombo,
 )
 from poker_calculator.domain.ranges import RANKS, parse_range, remove_blocked
+from poker_calculator.domain.sensitivity import SensitivityRequest, SensitivityTaskSnapshot
 from poker_calculator.strategies.registry import get_strategy, list_strategies
 
 
@@ -98,6 +99,32 @@ def create_app() -> FastAPI:
             return service.cancel(task_id)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail="任务不存在或已过期，请重新计算") from exc
+
+    @application.post("/api/v1/sensitivity-analyses", response_model=TaskCreated, status_code=202)
+    async def submit_sensitivity(payload: SensitivityRequest, request: Request) -> TaskCreated:
+        try:
+            task = request.app.state.tasks.submit(payload)
+        except QueueFullError as exc:
+            raise HTTPException(status_code=429, detail=str(exc)) from exc
+        return TaskCreated(task_id=task.id, status="queued")
+
+    @application.get(
+        "/api/v1/sensitivity-analyses/{task_id}", response_model=SensitivityTaskSnapshot
+    )
+    async def get_sensitivity(task_id: str, request: Request) -> SensitivityTaskSnapshot:
+        try:
+            return request.app.state.tasks.get_sensitivity(task_id)  # type: ignore[no-any-return]
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail="任务不存在或已过期") from exc
+
+    @application.post(
+        "/api/v1/sensitivity-analyses/{task_id}/cancel", response_model=SensitivityTaskSnapshot
+    )
+    async def cancel_sensitivity(task_id: str, request: Request) -> SensitivityTaskSnapshot:
+        try:
+            return request.app.state.tasks.cancel_sensitivity(task_id)  # type: ignore[no-any-return]
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail="任务不存在或已过期") from exc
 
     return application
 

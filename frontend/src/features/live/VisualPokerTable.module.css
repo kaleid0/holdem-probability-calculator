@@ -15,6 +15,29 @@
   color: #546b60;
   font-size: 12px;
 }
+.actionBanner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 16px;
+  color: #546b60;
+  background: #e8efea;
+  font-size: 13px;
+  font-weight: 600;
+}
+.actionBannerActive {
+  color: #714b0b;
+  background: #fff0c9;
+}
+.actionDot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: currentColor;
+}
 .frame {
   position: relative;
   height: 620px;
@@ -233,10 +256,11 @@
 }
 .active {
   z-index: 1;
-  border: 2px solid #298664;
+  border: 2px solid #b57918;
+  background: #fff8e7;
   padding: 10px 11px;
   box-shadow:
-    0 0 0 4px #72bb9426,
+    0 0 0 4px #e9b54c55,
     0 5px 15px #173f341a;
 }
 .active .status {

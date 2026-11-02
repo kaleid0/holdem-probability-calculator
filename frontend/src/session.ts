@@ -18,6 +18,7 @@ export type SessionAction =
   | { type: "record"; game: LiveGame; draft?: Draft }
   | { type: "undo" }
   | { type: "initial-chips"; amounts: number[] }
+  | { type: "reset-session"; amounts: number[] }
   | { type: "settle"; winners: number[][] }
   | { type: "new-hand" };
 
@@ -58,10 +59,11 @@ export function snapshotFromGame(game: LiveGame, draft: Draft): Draft {
   };
 }
 export function sessionReducer(state: Session, action: SessionAction): Session {
-  if (action.type === "initial-chips") {
+  if (action.type === "initial-chips" || action.type === "reset-session") {
     if (
-      bankrollFor(state.draft).hands.length ||
-      (state.game && state.game.phase !== "hand") ||
+      (action.type === "initial-chips" &&
+        (bankrollFor(state.draft).hands.length ||
+          (state.game && state.game.phase !== "hand"))) ||
       action.amounts.length !== state.draft.opponents.length + 1 ||
       action.amounts.some((n) => !chipAmount.safeParse(n).success) ||
       action.amounts.filter((n) => n > 0).length < 2 ||
@@ -80,6 +82,28 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
     if (action.amounts[table.dealer] === 0)
       table.dealer = action.amounts.findIndex((n) => n > 0);
     draft.table = table;
+    if (action.type === "reset-session") {
+      return {
+        ...state,
+        draft: {
+          ...draft,
+          hero: [null, null],
+          board: [],
+          boardSize: 0,
+          deadCards: [],
+          opponents: draft.opponents.map((_, i) => ({
+            kind: "random",
+            folded: action.amounts[i + 1] === 0,
+          })),
+          pot: "0",
+          call: "0",
+          bets: draft.opponents.map(() => "0"),
+          futureBetting: true,
+        },
+        game: null,
+        history: [],
+      };
+    }
     return {
       ...state,
       draft,

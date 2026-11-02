@@ -9,6 +9,7 @@ from poker_calculator.domain.models import (
     StrategyIdentity,
     SupportCheck,
 )
+from poker_calculator.engines.pots import PotAccumulator
 from poker_calculator.strategies.pot_odds import PotOddsStrategy
 
 
@@ -22,9 +23,10 @@ class RuleStrategy(PotOddsStrategy):
         update={
             "id": "equity-rules",
             "name": "权益余量规则",
-            "version": "0.2.0",
+            "version": "0.3.0",
             "description": "按用户设定的权益安全余量输出跟注倾向；属于启发式偏好，不改变 EV。",
             "config_schema": RuleConfig.model_json_schema(),
+            "capabilities": {**PotOddsStrategy.manifest.capabilities, "side_pots": False},
         }
     )
 
@@ -32,6 +34,20 @@ class RuleStrategy(PotOddsStrategy):
         RuleConfig.model_validate(request.strategy_config)
 
     def check_support(self, request: AnalysisRequest) -> SupportCheck:
+        if request.pot_context:
+            pots = PotAccumulator(request).pots
+            if (
+                len(pots) != 1
+                or pots[0].is_refund
+                or len(pots[0].eligible) != len(request.opponents) + 1
+            ):
+                return SupportCheck(
+                    status="unsupported",
+                    reasons=["权益余量规则暂仅支持单底池；分池请使用底池赔率基线"],
+                )
+            if not request.pot_context.betting_closed_after_call:
+                return SupportCheck(status="unsupported", reasons=["尚有其他玩家待行动"])
+
         if request.call_amount == 0:
             return SupportCheck(
                 status="unsupported", reasons=["没有跟注额，本规则不比较过牌与下注"]

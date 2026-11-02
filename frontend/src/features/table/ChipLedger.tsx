@@ -9,16 +9,27 @@ export default function ChipLedger() {
   const book = bankrollFor(draft);
   const [inputs, setInputs] = useState<string[] | null>(null);
   const [error, setError] = useState("");
-  const editable = !book.hands.length && (!game || game.phase === "hand");
+  const [resetting, setResetting] = useState(false);
+  const editable =
+    resetting || (!book.hands.length && (!game || game.phase === "hand"));
   const inProgress = !!game?.stacks && game.phase !== "hand" && !game.payouts;
   return (
     <section className={s.chipSection} aria-label="筹码账本">
       <h3>
         玩家筹码{" "}
         <small>
-          {editable ? "每位玩家可分别设置初始筹码" : "结算后自动带入下一手"}
+          {resetting
+            ? "填写新一场的初始筹码"
+            : editable
+              ? "每位玩家可分别设置初始筹码"
+              : "结算后自动带入下一手"}
         </small>
       </h3>
+      {resetting && (
+        <p className={s.resetNotice}>
+          确认后将清空本场行动、牌面、每手输赢记录及累计盈亏，并按下方金额重新分配筹码。牌桌人数、庄位和盲注保留；无筹码的庄位会顺延。
+        </p>
+      )}
       <div className={s.chipGrid}>
         {book.initial.map((initial, i) => {
           const balance = book.balances[i];
@@ -41,6 +52,7 @@ export default function ChipLedger() {
                     );
                     values[i] = e.target.value;
                     setInputs(values);
+                    setError("");
                   }}
                 />
               </label>
@@ -76,14 +88,29 @@ export default function ChipLedger() {
               );
               return;
             }
-            dispatch({ type: "initial-chips", amounts });
+            dispatch({
+              type: resetting ? "reset-session" : "initial-chips",
+              amounts,
+            });
+            setResetting(false);
             setInputs(null);
             setError("");
           }}
         >
-          保存初始筹码
+          {resetting ? "确认重置并分配筹码" : "保存初始筹码"}
         </button>
       )}
+      <button
+        type="button"
+        className={s.resetButton}
+        onClick={() => {
+          setInputs(resetting ? null : book.initial.map(String));
+          setResetting(!resetting);
+          setError("");
+        }}
+      >
+        {resetting ? "取消重置" : "重置全局对局"}
+      </button>
       {error && (
         <p className={s.error} role="alert">
           {error}

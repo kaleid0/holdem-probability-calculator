@@ -16,3 +16,15 @@ export const defaultTable = (): TableConfig => ({
   smallBlind: 5,
   bigBlind: 10,
 });
+
+export function parseBlindInput(small: string, big: string) {
+  if (!/^\d+$/.test(small.trim()) || !/^\d+$/.test(big.trim())) return null;
+  const result = tableSchema.safeParse({
+    dealer: 0,
+    smallBlind: Number(small),
+    bigBlind: Number(big),
+  });
+  return result.success
+    ? { smallBlind: result.data.smallBlind, bigBlind: result.data.bigBlind }
+    : null;
+}

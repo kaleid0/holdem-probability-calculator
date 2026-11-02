@@ -9,6 +9,34 @@ from poker_calculator.engines.equity import CalculationCancelled, CalculationTim
 from poker_calculator.strategies.registry import get_strategy
 
 
+def execute_sensitivity(
+    payload: dict[str, Any], progress: Any, cancellation: Any, time_limit: float
+) -> dict[str, Any]:
+    from poker_calculator.application.sensitivity import run_sensitivity
+    from poker_calculator.domain.sensitivity import SensitivityRequest
+
+    progress["started"] = True
+    services = AnalysisServices(
+        progress=lambda completed, total: progress.update({"completed": completed, "total": total}),
+        cancelled=cancellation.is_set,
+        deadline=time.monotonic() + time_limit,
+    )
+    result = run_sensitivity(SensitivityRequest.model_validate(payload), services)
+    successes = sum(o.status == "ok" for o in result.outcomes)
+    return {
+        "sensitivity_result": result.model_dump(),
+        "cancelled": cancellation.is_set(),
+        "completion": "complete"
+        if successes == len(result.outcomes)
+        else "partial"
+        if successes
+        else "none",
+        "budget_error": "部分场景超过总预算"
+        if any(o.status == "timed-out" for o in result.outcomes)
+        else None,
+    }
+
+
 def execute_analysis(
     payload: dict[str, Any], progress: Any, cancellation: Any, time_limit: float
 ) -> dict[str, Any]:

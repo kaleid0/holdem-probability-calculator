@@ -309,7 +309,7 @@ export default function LiveTable({
                   type="range"
                   min={minimum}
                   max={maximum}
-                  step={1}
+                  step={5}
                   value={raiseTo}
                   onChange={(e) =>
                     setRaiseExtra(Number(e.target.value) - minimum)
@@ -319,6 +319,16 @@ export default function LiveTable({
               </label>
               <div className={s.raiseFooter}>
                 <span>本次追加 {raiseTo - game.paid[game.actor]}</span>
+                {Number.isFinite(available) &&
+                  (maximum - minimum) % 5 !== 0 && (
+                    <button
+                      onClick={() =>
+                        save({ ...state, game: act(game, "raise", maximum) })
+                      }
+                    >
+                      全下至 {maximum}
+                    </button>
+                  )}
                 <button
                   className={s.primary}
                   onClick={() =>

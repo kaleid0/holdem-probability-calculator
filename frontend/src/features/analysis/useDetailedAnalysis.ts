@@ -6,7 +6,8 @@ import type {
   TaskCreated,
 } from "../../api/client";
 import { useScenario } from "../../state";
-import { toRequest, validateDraft } from "../../model";
+import { validateDraft } from "../../model";
+import { toRequest } from "../../analysisRequest";
 import type { Draft } from "../../model";
 
 export function useDetailedAnalysis(onStart: () => void, onOnline: () => void) {
@@ -22,7 +23,7 @@ export function useDetailedAnalysis(onStart: () => void, onOnline: () => void) {
   const [errors, setErrors] = useState<string[]>([]);
   const [networkError, setNetworkError] = useState("");
   const submittedInput = useRef("");
-  const fingerprint = JSON.stringify(toRequest(draft));
+  const fingerprint = JSON.stringify(toRequest(draft, game));
   const busy = submitting || activeTask(task?.status);
   const taskId = task?.task_id;
   useEffect(() => {
@@ -111,13 +112,13 @@ export function useDetailedAnalysis(onStart: () => void, onOnline: () => void) {
     setSubmitting(true);
     setErrors([]);
     setNetworkError("");
-    submittedInput.current = JSON.stringify(toRequest(scene));
+    submittedInput.current = JSON.stringify(toRequest(scene, game));
     onStart();
     try {
       const created = await request<TaskCreated>("/api/v1/analyses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(toRequest(scene)),
+        body: JSON.stringify(toRequest(scene, game)),
       });
       setTask({
         ...created,

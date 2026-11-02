@@ -3,6 +3,7 @@
   top: 8px;
   z-index: 20;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 16px;
   padding: 10px 16px;
@@ -12,6 +13,93 @@
   border-left: 3px solid var(--green);
   border-radius: var(--control-radius);
   box-shadow: 0 4px 16px #173f3410;
+}
+.actionEv {
+  flex: 1 0 100%;
+  min-width: 0;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+  font-size: 12px;
+}
+.actionEv p {
+  color: var(--muted);
+  margin: 6px 0;
+}
+.actionEv details {
+  max-height: 30vh;
+  overflow: auto;
+}
+.actionEv summary {
+  cursor: pointer;
+}
+.evScroll {
+  overflow-x: auto;
+}
+.actionEv table {
+  width: 100%;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+  border-collapse: collapse;
+}
+.actionEv th,
+.actionEv td {
+  padding: 5px 8px;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--line);
+}
+.actionEv caption {
+  text-align: left;
+  color: var(--muted);
+  margin: 4px 0;
+}
+.evInputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 8px 0;
+}
+.evInputs label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.evInputs input {
+  width: 100px;
+}
+.advice {
+  flex: 1 0 100%;
+  min-width: 0;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+  font-size: 13px;
+}
+.advice p {
+  margin: 4px 0;
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.stability {
+  display: inline-block;
+  margin-left: 10px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.details {
+  max-height: 30vh;
+  overflow: auto;
+  font-size: 12px;
+}
+.details summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 11px;
+}
+.details table {
+  width: 100%;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
 }
 .quickSummary {
   flex: 1;

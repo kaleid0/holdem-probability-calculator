@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useScenario } from "../../state";
 import { tableFor } from "../../session";
-import { tableSchema } from "../../table";
+import { parseBlindInput } from "../../table";
 import { createGame, startGame, seatName, gameLog } from "../../liveGame";
 import s from "./TableSettings.module.css";
 import ChipLedger from "./ChipLedger";
@@ -135,6 +135,7 @@ export default function TableSettings() {
                 小盲
                 <input
                   aria-label="小盲"
+                  maxLength={20}
                   inputMode="numeric"
                   value={blindInput?.small ?? table.smallBlind}
                   onChange={(e) =>
@@ -152,6 +153,7 @@ export default function TableSettings() {
                 大盲
                 <input
                   aria-label="大盲"
+                  maxLength={20}
                   inputMode="numeric"
                   value={blindInput?.big ?? table.bigBlind}
                   onChange={(e) =>
@@ -163,27 +165,57 @@ export default function TableSettings() {
                 />
               </label>
             </div>
+            <div className={s.blindPresets} role="group" aria-label="常用盲注">
+              {[
+                [1, 2],
+                [2, 4],
+                [5, 10],
+                [10, 20],
+                [25, 50],
+                [50, 100],
+              ].map(([small, big]) => (
+                <button
+                  key={small}
+                  type="button"
+                  aria-label={`盲注预设 ${small} / ${big}`}
+                  aria-pressed={
+                    table.smallBlind === small && table.bigBlind === big
+                  }
+                  onClick={() =>
+                    update(count, {
+                      ...table,
+                      smallBlind: small,
+                      bigBlind: big,
+                    })
+                  }
+                >
+                  {small} / {big}
+                </button>
+              ))}
+            </div>
             {blindInput && (
               <button
                 type="button"
                 onClick={() => {
-                  const result = tableSchema.safeParse({
-                    ...table,
-                    smallBlind: Number(blindInput.small),
-                    bigBlind: Number(blindInput.big),
-                  });
-                  if (!result.success) {
+                  const result = parseBlindInput(
+                    blindInput.small,
+                    blindInput.big,
+                  );
+                  if (!result) {
                     setError(
-                      "请填写正整数盲注，大盲须不小于小盲（小盲最多 1,000,000）。",
+                      "请填写正整数盲注，大盲须不小于小盲；小盲最多 1,000,000，大盲最多 2,000,000。",
                     );
                     return;
                   }
-                  update(count, result.data);
+                  update(count, { ...table, ...result });
                 }}
               >
                 应用盲注
               </button>
             )}
+            <p className={s.fieldHint}>
+              可自由设置比例；输入后点击“应用盲注”，设置自动保存。
+            </p>
           </fieldset>
         </div>
         <ChipLedger key={`${count}:${book.initial.join(",")}`} />

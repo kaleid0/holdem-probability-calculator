@@ -2,6 +2,12 @@ import { z } from "zod";
 import type { components } from "./api/generated/schema";
 import { tableSchema } from "./table";
 import { bankrollSchema } from "./bankroll";
+import {
+  defaultRiverBet,
+  riverBetConfig,
+  riverBetSchema,
+  validateRiverBet,
+} from "./riverBet";
 
 export const ranks = "23456789TJQKA";
 export const suits = ["♠", "♥", "♣", "♦"] as const;
@@ -36,7 +42,8 @@ export const draftSchema = z
           }),
           z.object({
             kind: z.literal("range"),
-            text: z.string().max(12000),
+            text: z.string().max(65536),
+            rangeSource: z.enum(["current", "manual"]).optional(),
             folded: z.boolean().optional(),
           }),
         ]),
@@ -52,6 +59,7 @@ export const draftSchema = z
     strategyId: z.string().min(1).max(100),
     strategyIds: z.array(z.string().min(1).max(100)).max(6).default([]),
     ruleMargin: z.number().min(0).max(0.5).default(0.05),
+    riverBet: riverBetSchema,
     table: tableSchema.optional(),
     bankroll: bankrollSchema.optional(),
   })
@@ -82,6 +90,7 @@ export function emptyDraft(): Draft {
     strategyId: "pot-odds",
     strategyIds: ["pot-odds"],
     ruleMargin: 0.05,
+    riverBet: defaultRiverBet(),
   };
 }
 export function exampleDraft(): Draft {
@@ -147,6 +156,9 @@ export function validateDraft(draft: Draft): string[] {
   if (Number(draft.call) > Number(draft.pot))
     errors.push("跟注额不能大于已包含对手下注的当前底池。");
   if (!draft.strategyIds.length) errors.push("请至少选择一种分析策略。");
+  if (draft.strategyIds.includes("river-bet")) {
+    errors.push(...validateRiverBet(draft.riverBet));
+  }
   if (!draft.opponents.some((o) => !o.folded))
     errors.push("至少需要一名在局对手才能分析摊牌权益。");
   if (draft.table && draft.table.dealer > draft.opponents.length)
@@ -195,7 +207,12 @@ export function toRequest(
       : [draft.strategyId]
     ).map((id) => ({
       id,
-      config: id === "equity-rules" ? { equity_margin: draft.ruleMargin } : {},
+      config:
+        id === "equity-rules"
+          ? { equity_margin: draft.ruleMargin }
+          : id === "river-bet"
+            ? riverBetConfig(draft.riverBet)
+            : {},
     })),
     samples: draft.samples,
     equity_method: "auto",

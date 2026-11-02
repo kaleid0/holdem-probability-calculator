@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 3,
+  "draft": {
+    "hero": [44, 45],
+    "board": [0, 5, 22, 31, 32],
+    "boardSize": 5,
+    "deadCards": [],
+    "opponents": [{"kind": "range", "text": "AsAh, QsQh"}],
+    "pot": "100",
+    "call": "0",
+    "bets": ["50"],
+    "futureBetting": false,
+    "samples": 10000,
+    "seed": 42,
+    "strategyId": "pot-odds",
+    "strategyIds": ["river-bet"],
+    "ruleMargin": 0.05,
+    "riverBet": {
+      "mode": "manual",
+      "effectiveStack": "200",
+      "checkClosesAction": true,
+      "bets": [
+        {"amount": "50", "foldPercent": "50", "callingRange": "AsAh"},
+        {"amount": "100", "foldPercent": "50", "callingRange": "AsAh"}
+      ]
+    }
+  }
+}

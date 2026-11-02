@@ -3,6 +3,7 @@ import { activeTask } from "../../api/client";
 import type { Strategy } from "../../api/client";
 import Comparison from "./Comparison";
 import Results from "./AnalysisResults";
+import SensitivityPanel from "./SensitivityPanel";
 import type { useDetailedAnalysis } from "./useDetailedAnalysis";
 import s from "./Analysis.module.css";
 import ui from "../../shared/ui/Shared.module.css";
@@ -132,6 +133,7 @@ export default function AnalysisPanel({
           </p>
         )}
       </section>
+      <SensitivityPanel />
     </section>
   );
 }

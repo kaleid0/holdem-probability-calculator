@@ -13,6 +13,8 @@ const chips = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const seat = z.number().int().min(0).max(8);
 const gameSchema = z
   .object({
+    handId: z.string().max(100).optional(),
+    openingSeats: z.array(seat).min(2).max(9).optional(),
     count: z.number().int().min(2).max(9),
     dealer: seat,
     smallBlind: chips.positive(),

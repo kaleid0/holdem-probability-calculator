@@ -118,6 +118,15 @@ export default function VisualPokerTable({
           盲注 {game.smallBlind} / {game.bigBlind}
         </span>
       </div>
+      <div
+        className={`${s.actionBanner} ${game.phase === "betting" ? s.actionBannerActive : ""}`}
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <span className={s.actionDot} aria-hidden="true" />
+        {game.phase === "betting" ? `轮到 ${seatName(game.actor)} 行动` : phase}
+      </div>
       <div className={s.frame} data-count={game.count}>
         <div className={s.rail} aria-hidden="true">
           <div className={s.felt} />

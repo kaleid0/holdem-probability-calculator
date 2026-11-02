@@ -1,0 +1,126 @@
+.panel {
+  border-top: 1px solid var(--line);
+  margin-top: 28px;
+  padding-top: 24px;
+  min-width: 0;
+}
+.panel h3 {
+  margin: 0 0 10px;
+}
+.panel button {
+  font: inherit;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px 12px;
+  cursor: pointer;
+}
+.panel button:not([class]) {
+  color: inherit;
+  background: #f4f8f6;
+}
+.panel button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+.actions > button {
+  width: auto;
+}
+.actions > button:first-child {
+  flex: 1 1 240px;
+}
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 14px 0;
+}
+.controls label {
+  display: grid;
+  gap: 6px;
+  flex: 1 1 160px;
+  font-size: 13px;
+}
+.panel select,
+.panel input,
+.panel textarea {
+  background: var(--surface, #fff);
+  color: inherit;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px;
+  max-width: 100%;
+}
+.panel textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 60px;
+  resize: vertical;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+.scroll {
+  overflow-x: auto;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.table th,
+.table td {
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  padding: 10px 8px;
+}
+.panel details {
+  margin: 12px 0;
+  font-size: 13px;
+}
+.panel summary {
+  cursor: pointer;
+  padding: 6px 0;
+}
+.panel p {
+  line-height: 1.6;
+}
+.trace {
+  padding: 10px;
+  background: var(--canvas, #f4f6f8);
+  border-radius: 6px;
+  margin: 6px 0;
+}
+.matrix {
+  display: grid;
+  grid-template-columns: repeat(13, minmax(0, 1fr));
+  gap: 2px;
+  margin-top: 10px;
+}
+.matrix span {
+  font-size: 10px;
+  padding: 6px 0;
+  text-align: center;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: #163829;
+}
+.combos {
+  max-height: 220px;
+  overflow-y: auto;
+}
+.error {
+  color: #a73333;
+}
+.file {
+  font-size: 12px;
+}
+@media (max-width: 540px) {
+  .matrix span {
+    font-size: 8px;
+    padding: 5px 0;
+  }
+}

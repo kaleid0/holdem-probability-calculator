@@ -72,6 +72,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sensitivity-analyses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Sensitivity */
+        post: operations["submit_sensitivity_api_v1_sensitivity_analyses_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sensitivity-analyses/{task_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Sensitivity */
+        get: operations["get_sensitivity_api_v1_sensitivity_analyses__task_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sensitivity-analyses/{task_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel Sensitivity */
+        post: operations["cancel_sensitivity_api_v1_sensitivity_analyses__task_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/strategies": {
         parameters: {
             query?: never;
@@ -116,9 +167,13 @@ export interface components {
              * Action
              * @enum {string}
              */
-            action: "fold" | "call";
+            action: "fold" | "call" | "check" | "bet";
             /** Amount */
             amount?: number | null;
+            /** Call Return */
+            call_return?: number | null;
+            /** Delta Standard Error */
+            delta_standard_error?: number | null;
             /** Ev */
             ev?: number | null;
             /**
@@ -126,6 +181,14 @@ export interface components {
              * @default 相对此刻弃牌的增量收益
              */
             ev_baseline: string;
+            /** Ev Delta */
+            ev_delta?: number | null;
+            /** Ev Max */
+            ev_max?: number | null;
+            /** Ev Min */
+            ev_min?: number | null;
+            /** Ev Standard Error */
+            ev_standard_error?: number | null;
             /**
              * Ev Unit
              * @default chips
@@ -134,11 +197,57 @@ export interface components {
             ev_unit: "chips";
             /** Explanation */
             explanation: string;
+            /** Fold Probability */
+            fold_probability?: number | null;
+            /** Fold Return */
+            fold_return?: number | null;
             /**
              * Method
              * @default showdown-reference
              */
             method: string;
+            /** Showdown Equity */
+            showdown_equity?: number | null;
+        };
+        /** ActionEvent */
+        ActionEvent: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "smallBlind" | "bigBlind" | "fold" | "check" | "call" | "bet" | "raise";
+            /** Activeplayersbefore */
+            activePlayersBefore: number;
+            /** Amount */
+            amount: number;
+            /** Highestbefore */
+            highestBefore: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "action";
+            /** Minraisebefore */
+            minRaiseBefore: number;
+            /** Player */
+            player: number;
+            /** Potafter */
+            potAfter: number;
+            /** Potbefore */
+            potBefore: number;
+            /** Sequence */
+            sequence: number;
+            /**
+             * Street
+             * @enum {integer}
+             */
+            street: 0 | 3 | 4 | 5;
+            /** Streettotal */
+            streetTotal: number;
+            /** Tocall */
+            toCall: number;
+            /** Totalcommitted */
+            totalCommitted: number;
         };
         /** AnalysisRequest */
         AnalysisRequest: {
@@ -169,6 +278,7 @@ export interface components {
              * @default 150
              */
             pot_before_call: number;
+            pot_context?: components["schemas"]["PotContext"] | null;
             /**
              * Samples
              * @default 20000
@@ -224,6 +334,12 @@ export interface components {
             equity: number | null;
             /** Equity Standard Error */
             equity_standard_error: number | null;
+            /** Expected Return */
+            expected_return?: number | null;
+            /** History Ranges */
+            history_ranges?: components["schemas"]["HistoryRangeSummary"][];
+            inference?: components["schemas"]["StrategyInference"] | null;
+            limited_tree?: components["schemas"]["LimitedTreeSummary"] | null;
             /** Lose Probability */
             lose_probability: number | null;
             /** Method */
@@ -235,6 +351,8 @@ export interface components {
             model_version: string;
             /** Pot Odds Ratio */
             pot_odds_ratio: string | null;
+            /** Pots */
+            pots?: components["schemas"]["PotEquity"][];
             /** Recommendation */
             recommendation: string | null;
             /** Sample Count */
@@ -255,6 +373,30 @@ export interface components {
             /** Win Probability */
             win_probability: number | null;
         };
+        /** EndEvent */
+        EndEvent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "handEnd";
+            /** Pot */
+            pot: number;
+            /**
+             * Reason
+             * @enum {string}
+             */
+            reason: "allOthersFolded" | "showdown";
+            /** Sequence */
+            sequence: number;
+            /**
+             * Street
+             * @enum {integer}
+             */
+            street: 0 | 3 | 4 | 5;
+            /** Winner */
+            winner: number | null;
+        };
         /** ExactOpponent */
         ExactOpponent: {
             /** Cards */
@@ -272,6 +414,128 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** HistoryContext */
+        HistoryContext: {
+            /** Big Blind */
+            big_blind: number;
+            /** Complete */
+            complete: boolean;
+            /** Count */
+            count: number;
+            /** Cutoff Sequence */
+            cutoff_sequence: number;
+            /** Dealer */
+            dealer: number;
+            /** Events */
+            events: (components["schemas"]["ActionEvent"] | components["schemas"]["StreetEvent"] | components["schemas"]["EndEvent"])[];
+            /** Hand Id */
+            hand_id: string;
+            /** Opening Seats */
+            opening_seats: number[];
+            /**
+             * Schema Version
+             * @default 1
+             * @constant
+             */
+            schema_version: 1;
+            /** Small Blind */
+            small_blind: number;
+            /** Stacks */
+            stacks?: number[] | null;
+        };
+        /** HistoryRangeSummary */
+        HistoryRangeSummary: {
+            /** Combos */
+            combos: number;
+            /** Effective Combos */
+            effective_combos: number;
+            /** Observed Actions */
+            observed_actions: number;
+            /** Seat */
+            seat: number;
+            /** Source */
+            source: string;
+            /** Value Share */
+            value_share: number;
+        };
+        /** InferenceTrace */
+        InferenceTrace: {
+            /** Action */
+            action: string;
+            /** After */
+            after: {
+                [key: string]: number;
+            };
+            /** Before */
+            before: {
+                [key: string]: number;
+            };
+            /** Board */
+            board: number[];
+            /** Context */
+            context: string;
+            /** Rule Id */
+            rule_id: string;
+            /** Sequence */
+            sequence: number;
+            /**
+             * Street
+             * @enum {integer}
+             */
+            street: 0 | 3 | 4 | 5;
+        };
+        /** InferredHandClass */
+        InferredHandClass: {
+            /** Combos */
+            combos: number;
+            /** Hand */
+            hand: string;
+            /** Probability */
+            probability: number;
+        };
+        /** LimitedTreeSummary */
+        LimitedTreeSummary: {
+            /** Elapsed Ms */
+            elapsed_ms: number;
+            /** Horizon */
+            horizon: string;
+            /** Marginal */
+            marginal: boolean;
+            /** Sample Count Per Scenario */
+            sample_count_per_scenario: number;
+            /** Scenarios */
+            scenarios: components["schemas"]["TreeScenario"][];
+            /** Stable Actions */
+            stable_actions: string[];
+        };
+        /** PotContext */
+        PotContext: {
+            /**
+             * Betting Closed After Call
+             * @default false
+             */
+            betting_closed_after_call: boolean;
+            /** Contributions */
+            contributions: number[];
+            /** Folded Contributions */
+            folded_contributions?: number[];
+        };
+        /** PotEquity */
+        PotEquity: {
+            /** Amount */
+            amount: number;
+            /** Eligible */
+            eligible: number[];
+            /** Equity */
+            equity: number;
+            /** Expected Return */
+            expected_return: number;
+            /**
+             * Is Refund
+             * @default false
+             */
+            is_refund: boolean;
         };
         /** RandomOpponent */
         RandomOpponent: {
@@ -318,6 +582,157 @@ export interface components {
             /** Text */
             text: string;
         };
+        /** RiverScenarioSummary */
+        RiverScenarioSummary: {
+            /** Best Amounts */
+            best_amounts?: number[];
+            /** Best Ev */
+            best_ev?: number | null;
+            /** Check Ev */
+            check_ev?: number | null;
+            /** Equity */
+            equity?: number | null;
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Reasons */
+            reasons?: string[];
+            /**
+             * Status
+             * @default ok
+             * @enum {string}
+             */
+            status: "ok" | "insufficient-data";
+        };
+        /** SensitivityOutcome */
+        SensitivityOutcome: {
+            /** Bluff Bias */
+            bluff_bias: number;
+            /**
+             * Clipped Mass
+             * @default 0
+             */
+            clipped_mass: number;
+            /** Combos */
+            combos?: components["schemas"]["WeightedCombo"][];
+            /** Composition */
+            composition?: {
+                [key: string]: number;
+            };
+            /** Equity Delta */
+            equity_delta?: number | null;
+            /** Ev Delta */
+            ev_delta?: number | null;
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Reasons */
+            reasons?: string[];
+            result?: components["schemas"]["AnalysisResult"] | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "ok" | "insufficient-data" | "unsupported" | "error" | "timed-out" | "cancelled";
+            /** Traces */
+            traces?: components["schemas"]["InferenceTrace"][];
+        };
+        /** SensitivityRequest */
+        SensitivityRequest: {
+            base_analysis: components["schemas"]["AnalysisRequest"];
+            history_context?: components["schemas"]["HistoryContext"] | null;
+            /**
+             * Mode
+             * @default history
+             * @enum {string}
+             */
+            mode: "history" | "manual";
+            /**
+             * Model Version
+             * @default history-rules-v1
+             * @constant
+             */
+            model_version: "history-rules-v1";
+            /** Opponent Seats */
+            opponent_seats: number[];
+            preflop_prior?: components["schemas"]["RangeOpponent"] | null;
+            /** Scenarios */
+            scenarios?: components["schemas"]["SensitivityScenario"][];
+            /**
+             * Schema Version
+             * @default 1
+             * @constant
+             */
+            schema_version: 1;
+            /** Target Seat */
+            target_seat: number;
+        };
+        /** SensitivityResult */
+        SensitivityResult: {
+            /** Cutoff Sequence */
+            cutoff_sequence: number | null;
+            /** Elapsed Ms */
+            elapsed_ms: number;
+            /**
+             * Model Version
+             * @default history-rules-v1
+             */
+            model_version: string;
+            /** Outcomes */
+            outcomes: components["schemas"]["SensitivityOutcome"][];
+            /** Prior Source */
+            prior_source: string;
+            /** Request Hash */
+            request_hash: string;
+            /**
+             * Schema Version
+             * @default 1
+             * @constant
+             */
+            schema_version: 1;
+            /** Summary */
+            summary: string;
+            /** Target Seat */
+            target_seat: number;
+            /** Warnings */
+            warnings: string[];
+        };
+        /** SensitivityScenario */
+        SensitivityScenario: {
+            /**
+             * Bluff Bias
+             * @default 0
+             */
+            bluff_bias: number;
+            current_range?: components["schemas"]["RangeOpponent"] | null;
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+        };
+        /** SensitivityTaskSnapshot */
+        SensitivityTaskSnapshot: {
+            /**
+             * Completion
+             * @default none
+             * @enum {string}
+             */
+            completion: "complete" | "partial" | "none";
+            /** Error */
+            error?: string | null;
+            /** Progress */
+            progress: number;
+            result?: components["schemas"]["SensitivityResult"] | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "queued" | "running" | "cancelling" | "succeeded" | "failed" | "cancelled" | "expired";
+            /** Task Id */
+            task_id: string;
+        };
         /** StrategyIdentity */
         StrategyIdentity: {
             /** Id */
@@ -326,6 +741,44 @@ export interface components {
             name: string;
             /** Version */
             version: string;
+        };
+        /** StrategyInference */
+        StrategyInference: {
+            /**
+             * Clipped Mass
+             * @default 0
+             */
+            clipped_mass: number;
+            /** Cutoff Sequence */
+            cutoff_sequence: number;
+            /** Effective Combos */
+            effective_combos?: number | null;
+            /** Effective Stack */
+            effective_stack: number;
+            /** Evidence */
+            evidence: string[];
+            /** Hand Id */
+            hand_id: string;
+            /** Model Version */
+            model_version: string;
+            /** Observed Actions */
+            observed_actions: number;
+            /** Opponent Seat */
+            opponent_seat: number;
+            /** Posterior Combos */
+            posterior_combos: number;
+            /** Range Classes */
+            range_classes?: components["schemas"]["InferredHandClass"][];
+            /** Scenarios */
+            scenarios?: components["schemas"]["RiverScenarioSummary"][];
+            /** Sensitivity Summary */
+            sensitivity_summary?: string | null;
+            /** Source */
+            source: string;
+            /** Stable Amounts */
+            stable_amounts?: number[];
+            /** Warnings */
+            warnings: string[];
         };
         /** StrategyList */
         StrategyList: {
@@ -378,6 +831,23 @@ export interface components {
             /** Id */
             id: string;
         };
+        /** StreetEvent */
+        StreetEvent: {
+            /** Board */
+            board: number[] | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "street";
+            /** Sequence */
+            sequence: number;
+            /**
+             * Street
+             * @enum {integer}
+             */
+            street: 3 | 4 | 5;
+        };
         /** TaskCreated */
         TaskCreated: {
             /**
@@ -414,6 +884,15 @@ export interface components {
             task_id: string;
             /** Total Samples */
             total_samples: number;
+        };
+        /** TreeScenario */
+        TreeScenario: {
+            /** Best Actions */
+            best_actions: string[];
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
         };
         /** ValidationError */
         ValidationError: {
@@ -565,6 +1044,101 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RangePreview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_sensitivity_api_v1_sensitivity_analyses_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SensitivityRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskCreated"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_sensitivity_api_v1_sensitivity_analyses__task_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SensitivityTaskSnapshot"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_sensitivity_api_v1_sensitivity_analyses__task_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SensitivityTaskSnapshot"];
                 };
             };
             /** @description Validation Error */

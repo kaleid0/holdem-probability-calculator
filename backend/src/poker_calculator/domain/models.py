@@ -38,7 +38,7 @@ class WeightedCombo(Contract):
 
 class RangeOpponent(Contract):
     kind: Literal["range"]
-    text: str = Field(default="", max_length=12000)
+    text: str = Field(default="", max_length=65536)
     combos: list[WeightedCombo] = Field(default_factory=list, max_length=1326)
 
     @model_validator(mode="after")
@@ -67,6 +67,21 @@ class StrategySelection(Contract):
     config: dict[str, Any] = Field(default_factory=dict)
 
 
+class PotContext(Contract):
+    # Current commitments, before hero calls. Index 0 is hero; others match opponents.
+    contributions: list[Chips] = Field(min_length=2, max_length=9)
+    folded_contributions: list[Chips] = Field(default_factory=list, max_length=7)
+    betting_closed_after_call: bool = False
+
+
+class PotEquity(Contract):
+    amount: Chips
+    eligible: list[int]
+    is_refund: bool = False
+    equity: float
+    expected_return: float
+
+
 class AnalysisRequest(Contract):
     schema_version: Literal[1, 2] = 1
     hero: tuple[Card, Card]
@@ -75,6 +90,7 @@ class AnalysisRequest(Contract):
     opponents: list[Opponent] = Field(min_length=1, max_length=8)
     pot_before_call: Chips = 150
     call_amount: Chips = 50
+    pot_context: PotContext | None = None
     settlement_assumption: Literal["showdownAfterCall", "futureBettingPossible"] = (
         "futureBettingPossible"
     )
@@ -87,6 +103,16 @@ class AnalysisRequest(Contract):
 
     @model_validator(mode="after")
     def validate_scenario(self) -> "AnalysisRequest":
+        if self.pot_context:
+            context = self.pot_context
+            if len(context.contributions) != len(self.opponents) + 1:
+                raise ValueError("投入额必须对应自己及每一名在局对手")
+            if len(context.contributions) + len(context.folded_contributions) > 9:
+                raise ValueError("牌桌最多九人")
+            if sum(context.contributions + context.folded_contributions) != self.pot_before_call:
+                raise ValueError("玩家累计投入之和必须等于当前底池")
+            if self.pot_before_call + self.call_amount == 0:
+                raise ValueError("分池分析需要非零底池")
         if len(self.board) not in (0, 3, 4, 5):
             raise ValueError("公共牌数量必须为 0、3、4 或 5 张")
         known = list(self.hero) + self.board + self.dead_cards
@@ -137,13 +163,82 @@ class SupportCheck(Contract):
 
 
 class ActionAssessment(Contract):
-    action: Literal["fold", "call"]
+    action: Literal["fold", "call", "check", "bet"]
     amount: int | None = None
     ev: float | None = None
     ev_unit: Literal["chips"] = "chips"
     ev_baseline: str = "相对此刻弃牌的增量收益"
     method: str = "showdown-reference"
     explanation: str
+    fold_probability: float | None = None
+    showdown_equity: float | None = None
+    ev_delta: float | None = None
+    ev_min: float | None = None
+    ev_max: float | None = None
+    fold_return: float | None = None
+    call_return: float | None = None
+    ev_standard_error: float | None = None
+    delta_standard_error: float | None = None
+
+
+class InferredHandClass(Contract):
+    hand: str
+    probability: float
+    combos: int
+
+
+class RiverScenarioSummary(Contract):
+    id: str
+    name: str
+    status: Literal["ok", "insufficient-data"] = "ok"
+    reasons: list[str] = Field(default_factory=list)
+    equity: float | None = None
+    check_ev: float | None = None
+    best_ev: float | None = None
+    best_amounts: list[int] = Field(default_factory=list)
+
+
+class StrategyInference(Contract):
+    source: str
+    model_version: str
+    hand_id: str
+    cutoff_sequence: int
+    opponent_seat: int
+    effective_stack: Chips
+    posterior_combos: int
+    observed_actions: int
+    evidence: list[str]
+    warnings: list[str]
+    range_classes: list[InferredHandClass] = Field(default_factory=list)
+    effective_combos: float | None = None
+    clipped_mass: float = 0
+    scenarios: list[RiverScenarioSummary] = Field(default_factory=list)
+    stable_amounts: list[int] = Field(default_factory=list)
+    sensitivity_summary: str | None = None
+
+
+class HistoryRangeSummary(Contract):
+    seat: int
+    observed_actions: int
+    combos: int
+    effective_combos: float
+    value_share: float
+    source: str
+
+
+class TreeScenario(Contract):
+    id: str
+    name: str
+    best_actions: list[str]
+
+
+class LimitedTreeSummary(Contract):
+    horizon: str
+    scenarios: list[TreeScenario]
+    stable_actions: list[str]
+    marginal: bool
+    sample_count_per_scenario: int
+    elapsed_ms: float
 
 
 class AnalysisResult(Contract):
@@ -169,6 +264,11 @@ class AnalysisResult(Contract):
     candidates: list[ActionAssessment] = Field(default_factory=list)
     signals: list[str] = Field(default_factory=list)
     strategy_config: dict[str, Any] = Field(default_factory=dict)
+    pots: list[PotEquity] = Field(default_factory=list)
+    expected_return: float | None = None
+    inference: StrategyInference | None = None
+    history_ranges: list[HistoryRangeSummary] = Field(default_factory=list)
+    limited_tree: LimitedTreeSummary | None = None
 
 
 class StrategyOutcome(Contract):
@@ -201,7 +301,7 @@ class TaskSnapshot(Contract):
 
 
 class RangePreviewRequest(Contract):
-    text: str = Field(min_length=1, max_length=12000)
+    text: str = Field(min_length=1, max_length=65536)
     known_cards: list[Card] = Field(default_factory=list, max_length=52)
 
 

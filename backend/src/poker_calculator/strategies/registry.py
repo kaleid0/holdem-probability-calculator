@@ -1,8 +1,17 @@
 from poker_calculator.strategies.base import Strategy
+from poker_calculator.strategies.history_ranges import HistoryRangeStrategy
+from poker_calculator.strategies.postflop_tree import PostflopTreeStrategy
 from poker_calculator.strategies.pot_odds import PotOddsStrategy
+from poker_calculator.strategies.river_bet import RiverBetStrategy
 from poker_calculator.strategies.rules import RuleStrategy
 
-_STRATEGIES: dict[str, Strategy] = {"pot-odds": PotOddsStrategy(), "equity-rules": RuleStrategy()}
+_STRATEGIES: dict[str, Strategy] = {
+    "pot-odds": PotOddsStrategy(),
+    "equity-rules": RuleStrategy(),
+    "river-bet": RiverBetStrategy(),
+    "history-ranges": HistoryRangeStrategy(),
+    "postflop-tree": PostflopTreeStrategy(),
+}
 
 
 def get_strategy(strategy_id: str) -> Strategy:

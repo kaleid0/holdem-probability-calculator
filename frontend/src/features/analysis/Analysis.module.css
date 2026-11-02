@@ -346,6 +346,48 @@
   font-weight: 400;
   text-align: left;
 }
+.candidateMetric {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.riverCandidates {
+  min-width: 540px;
+}
+.riverCandidates th:first-child {
+  width: 90px;
+}
+.riverCandidates th:nth-child(2) {
+  width: 70px;
+}
+.riverCandidates th:nth-child(3) {
+  width: 190px;
+}
+.tableHint {
+  display: none;
+  font-size: 11px;
+  color: var(--muted);
+}
+@media (max-width: 540px) {
+  .tableHint {
+    display: block;
+  }
+}
+.tableScroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.tableScroll table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.tableScroll th,
+.tableScroll td {
+  padding: 7px 5px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
 .candidates th {
   color: var(--muted);
   font-size: 11px;

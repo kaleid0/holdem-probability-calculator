@@ -52,12 +52,15 @@ test("visual table follows actions, undo and street changes without losing the h
   for (const name of ["黑桃A", "黑桃K"])
     await page.getByRole("button", { name, exact: true }).click();
   await live.getByRole("button", { name: "开始牌局 →" }).click();
+  await expect(table.getByRole("status")).toHaveText("轮到 玩家 1（我） 行动");
   await expect(hero).toHaveAttribute("aria-current", "true");
   await expect(smallBlind).toContainText("995");
   await expect(bigBlind).toContainText("990");
   await live.getByRole("button", { name: "跟注 10", exact: true }).click();
   await expect(hero).toContainText("990");
   await expect(hero).toContainText(/本轮\s*(?:投入\s*)?10/);
+  await expect(table.getByRole("status")).toHaveText("轮到 玩家 2 行动");
+  await expect(table.locator('article[aria-current="true"]')).toHaveCount(1);
   await expect(smallBlind).toHaveAttribute("aria-current", "true");
   await live.getByRole("button", { name: "加注", exact: true }).click();
   await live.getByRole("slider").fill("30");

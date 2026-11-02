@@ -28,8 +28,8 @@ export default function Comparison({
     <div className={s.comparison}>
       <h3>策略对照</h3>
       <p className={ui.helper}>
-        固定同一牌局和对手模型。共享权益计算，参考 EV
-        口径相同；不对启发式偏好作收益排名。
+        固定同一牌局；各策略的响应假设与 EV
+        基准可能不同，请查看候选动作和计算依据，不跨口径排名。
       </p>
       {outcomes.map((item) => (
         <article key={item.strategy_id}>

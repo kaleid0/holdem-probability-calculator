@@ -6,7 +6,11 @@ import type {
   TaskCreated,
 } from "../../api/client";
 import { useScenario } from "../../state";
-import { toRequest, validateDraft } from "../../model";
+import { validateDraft } from "../../model";
+import { toRequest } from "../../analysisRequest";
+import { riverReadiness } from "../../riverReadiness";
+import { defaultRiverBet } from "../../riverBet";
+import { postflopReady } from "../../postflopTree";
 type Snapshot = {
   input: string;
   result?: AnalysisResult;
@@ -15,8 +19,10 @@ type Snapshot = {
 
 export function useQuickAnalysis(retryKey: number) {
   const { draft, game } = useScenario();
-  const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [retry, setRetry] = useState(0);
+  const [riverRetry, setRiverRetry] = useState(0);
+  const [historyRetry, setHistoryRetry] = useState(0);
+  const [treeRetry, setTreeRetry] = useState(0);
   // Quick analysis is independent of the user's precision and advanced strategies.
   const quickDraft = {
     ...draft,
@@ -30,10 +36,107 @@ export function useQuickAnalysis(retryKey: number) {
     : validation.join(" ");
   const input = unavailable
     ? ""
-    : JSON.stringify({ ...toRequest(quickDraft), equity_method: "monteCarlo" });
+    : JSON.stringify({
+        ...toRequest(quickDraft, game),
+        equity_method: "monteCarlo",
+      });
   // Checks and undo can change the decision without changing the request's cards or pot.
   const actions = JSON.stringify(game);
   const identity = JSON.stringify([input, actions, retry, retryKey]);
+  const baseline = useQuickTask(input, identity);
+  const readiness = riverReadiness(draft, game);
+  // The baseline completes first; advanced analysis never holds up its display.
+  const riverInput =
+    !unavailable && readiness.ready && baseline.result
+      ? JSON.stringify({
+          ...toRequest(
+            {
+              ...quickDraft,
+              strategyId: "river-bet",
+              strategyIds: ["river-bet"],
+              riverBet: defaultRiverBet(),
+            },
+            game,
+          ),
+          equity_method: "monteCarlo",
+        })
+      : "";
+  const river = useQuickTask(
+    riverInput,
+    JSON.stringify([riverInput, identity, riverRetry]),
+  );
+  const historyReady =
+    !unavailable &&
+    !readiness.ready &&
+    game?.phase === "betting" &&
+    game.actor === 0 &&
+    game.historyComplete &&
+    !!game.stacks &&
+    game.events.some(
+      (e) =>
+        e.kind === "action" &&
+        e.player > 0 &&
+        draft.opponents[e.player - 1]?.kind === "random" &&
+        !game.folded[e.player] &&
+        !["smallBlind", "bigBlind"].includes(e.action),
+    );
+  const historyInput =
+    historyReady && baseline.result
+      ? JSON.stringify({
+          ...toRequest(
+            {
+              ...quickDraft,
+              strategyId: "history-ranges",
+              strategyIds: ["history-ranges"],
+            },
+            game,
+          ),
+          equity_method: "monteCarlo",
+        })
+      : "";
+  const history = useQuickTask(
+    historyInput,
+    JSON.stringify([historyInput, identity, historyRetry]),
+  );
+  const treeReady = !unavailable && postflopReady(draft, game);
+  const treeInput =
+    treeReady &&
+    baseline.result &&
+    (!historyReady || history.result || history.current?.error)
+      ? JSON.stringify({
+          ...toRequest(
+            {
+              ...quickDraft,
+              strategyId: "postflop-tree",
+              strategyIds: ["postflop-tree"],
+            },
+            game,
+          ),
+          equity_method: "monteCarlo",
+        })
+      : "";
+  const tree = useQuickTask(
+    treeInput,
+    JSON.stringify([treeInput, identity, treeRetry]),
+  );
+  return {
+    ...baseline,
+    unavailable,
+    river,
+    history,
+    tree,
+    readiness,
+    draft,
+    game,
+    retry: () => setRetry((n) => n + 1),
+    retryRiver: () => setRiverRetry((n) => n + 1),
+    retryHistory: () => setHistoryRetry((n) => n + 1),
+    retryTree: () => setTreeRetry((n) => n + 1),
+  };
+}
+
+function useQuickTask(input: string, identity: string) {
+  const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
 
   useEffect(() => {
     if (!input) return;
@@ -62,7 +165,9 @@ export function useQuickAnalysis(retryKey: number) {
           result: task.result ?? undefined,
           error: task.result
             ? undefined
-            : (task.error ?? "快速分析未完成，请重试。"),
+            : (task.error ??
+              (task.outcomes?.flatMap((o) => o.reasons).join("；") ||
+                "快速分析未完成，请重试。")),
         });
       } catch (error) {
         if (stopped) return;
@@ -112,10 +217,8 @@ export function useQuickAnalysis(retryKey: number) {
   const result = current?.result;
   const pending = !!input && !result && !current?.error;
   return {
-    unavailable,
     current,
     result,
     pending,
-    retry: () => setRetry((n) => n + 1),
   };
 }

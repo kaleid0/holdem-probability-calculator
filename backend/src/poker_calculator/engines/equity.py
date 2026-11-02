@@ -10,10 +10,12 @@ from itertools import combinations
 from poker_calculator.domain.models import (
     AnalysisRequest,
     ExactOpponent,
+    PotEquity,
     RandomOpponent,
     RangeOpponent,
 )
 from poker_calculator.engines.evaluator import evaluate
+from poker_calculator.engines.pots import PotAccumulator
 
 EXACT_LIMIT = 50_000
 BATCH_SIZE = 250
@@ -37,6 +39,7 @@ class EquityResult:
     equity_standard_error: float | None
     sample_count: int
     elapsed_ms: float
+    pots: tuple[PotEquity, ...] = ()
 
 
 def state_count(deck_size: int, random_count: int, missing_board: int) -> int:
@@ -111,6 +114,7 @@ def calculate_equity(
                     opponents.append(hand)
             yield opponents, tuple(drawn[cursor:])
 
+    pots = PotAccumulator(request)
     outcomes = _enumerate(deck, hands, missing) if exact else simulated()
     wins = ties = losses = 0
     share_sum = share_squared_sum = 0.0
@@ -139,6 +143,9 @@ def calculate_equity(
                 ties += 1
         else:
             losses += 1
+        pot_share = pots.add(scores)
+        if pot_share is not None:
+            share = pot_share
         share_sum += share
         share_squared_sum += share * share
         completed += 1
@@ -152,6 +159,7 @@ def calculate_equity(
         variance = max(0.0, (share_squared_sum - completed * equity**2) / (completed - 1))
         stderr = math.sqrt(variance / completed)
     return EquityResult(
+        pots=tuple(pots.results()),
         method="exact" if exact else "monteCarlo",
         win_probability=wins / completed,
         tie_probability=ties / completed,

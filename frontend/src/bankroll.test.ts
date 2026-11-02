@@ -64,6 +64,88 @@ function reload(state: Session): Session {
 }
 
 describe("player chips across hands", () => {
+  it.each(["betting", "showdown", "settled", "snapshot"])(
+    "resets the entire %s session and persists a fresh chip allocation",
+    (phase) => {
+      let state = prepare([100, 200, 0]);
+      if (phase === "showdown" || phase === "settled") {
+        state = sessionReducer(state, {
+          type: "record",
+          game: runout(state.game!),
+        });
+        if (phase === "settled")
+          state = sessionReducer(state, { type: "settle", winners: [[1]] });
+      }
+      if (phase === "snapshot") state = { ...state, game: null };
+      state = {
+        ...state,
+        draft: {
+          ...state.draft,
+          hero: [48, 44],
+          board: [0, 4, 8],
+          boardSize: 3,
+          deadCards: [12],
+          opponents: [
+            { kind: "exact", cards: [16, 20], folded: true },
+            { kind: "range", text: "AA", folded: true },
+          ],
+          futureBetting: false,
+          samples: 10000,
+        },
+      };
+      const amounts = [0, 300, 400];
+      const next = reload(
+        sessionReducer(state, { type: "reset-session", amounts }),
+      );
+      expect(next.draft.bankroll).toEqual({
+        initial: amounts,
+        balances: amounts,
+        hands: [],
+      });
+      expect(next.draft).toMatchObject({
+        hero: [null, null],
+        board: [],
+        boardSize: 0,
+        deadCards: [],
+        opponents: [
+          { kind: "random", folded: false },
+          { kind: "random", folded: false },
+        ],
+        pot: "0",
+        call: "0",
+        bets: ["0", "0"],
+        futureBetting: true,
+        samples: 10000,
+        strategyIds: state.draft.strategyIds,
+        table: { dealer: 1, smallBlind: 5, bigBlind: 10 },
+      });
+      expect(next.mode).toBe(state.mode);
+      expect(next.game).toBeNull();
+      expect(next.history).toEqual([]);
+      expect(sessionReducer(next, { type: "undo" })).toBe(next);
+      expect(sessionReducer(next, { type: "new-hand" }).game?.stacks).toEqual(
+        amounts,
+      );
+    },
+  );
+  it.each([
+    [100],
+    [100, 100, 100],
+    [0, 100],
+    [-1, 100],
+    [1.5, 100],
+    [NaN, 100],
+    [Infinity, 100],
+    [1_000_000_000, 1],
+  ])(
+    "rejects invalid reset allocation %j without clearing the session",
+    (...amounts) => {
+      const state = record(prepare(), "fold");
+      expect(sessionReducer(state, { type: "reset-session", amounts })).toBe(
+        state,
+      );
+    },
+  );
   it("settles folds once, restores on undo, carries balances and records consecutive hands", () => {
     const before = prepare();
     let state = reload(record(before, "fold"));

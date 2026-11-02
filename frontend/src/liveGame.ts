@@ -8,6 +8,8 @@ export {
 } from "./handHistory";
 export type { Street, HandEvent, PlayerAction } from "./handHistory";
 export type LiveGame = {
+  handId?: string;
+  openingSeats?: number[];
   count: number;
   dealer: number;
   smallBlind: number;
@@ -38,6 +40,10 @@ export function createGame(
   stacks?: number[],
 ): LiveGame {
   return {
+    handId: crypto.randomUUID(),
+    openingSeats: Array.from({ length: count }, (_, i) => i).filter(
+      (i) => !stacks || stacks[i] > 0,
+    ),
     count,
     dealer,
     smallBlind,
@@ -84,6 +90,8 @@ export function startGame(game: LiveGame): LiveGame {
       : pending.filter((i) => paid[i] < Math.max(...paid));
   return {
     ...game,
+    handId: game.handId ?? crypto.randomUUID(),
+    openingSeats: seated,
     paid,
     total: [...paid],
     pending: canAct,

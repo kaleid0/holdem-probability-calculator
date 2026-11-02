@@ -7,7 +7,9 @@
           "action": {
             "enum": [
               "fold",
-              "call"
+              "call",
+              "check",
+              "bet"
             ],
             "title": "Action",
             "type": "string"
@@ -22,6 +24,28 @@
               }
             ],
             "title": "Amount"
+          },
+          "call_return": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Call Return"
+          },
+          "delta_standard_error": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Standard Error"
           },
           "ev": {
             "anyOf": [
@@ -39,6 +63,50 @@
             "title": "Ev Baseline",
             "type": "string"
           },
+          "ev_delta": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ev Delta"
+          },
+          "ev_max": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ev Max"
+          },
+          "ev_min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ev Min"
+          },
+          "ev_standard_error": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ev Standard Error"
+          },
           "ev_unit": {
             "const": "chips",
             "default": "chips",
@@ -49,10 +117,43 @@
             "title": "Explanation",
             "type": "string"
           },
+          "fold_probability": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fold Probability"
+          },
+          "fold_return": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fold Return"
+          },
           "method": {
             "default": "showdown-reference",
             "title": "Method",
             "type": "string"
+          },
+          "showdown_equity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Showdown Equity"
           }
         },
         "required": [
@@ -60,6 +161,121 @@
           "explanation"
         ],
         "title": "ActionAssessment",
+        "type": "object"
+      },
+      "ActionEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "enum": [
+              "smallBlind",
+              "bigBlind",
+              "fold",
+              "check",
+              "call",
+              "bet",
+              "raise"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "activePlayersBefore": {
+            "maximum": 9.0,
+            "minimum": 2.0,
+            "title": "Activeplayersbefore",
+            "type": "integer"
+          },
+          "amount": {
+            "maximum": 9007199254740991.0,
+            "minimum": 0.0,
+            "title": "Amount",
+            "type": "integer"
+          },
+          "highestBefore": {
+            "maximum": 9007199254740991.0,
+            "minimum": 0.0,
+            "title": "Highestbefore",
+            "type": "integer"
+          },
+          "kind": {
+            "const": "action",
+            "title": "Kind",
+            "type": "string"
+          },
+          "minRaiseBefore": {
+            "exclusiveMinimum": 0.0,
+            "title": "Minraisebefore",
+            "type": "integer"
+          },
+          "player": {
+            "maximum": 8.0,
+            "minimum": 0.0,
+            "title": "Player",
+            "type": "integer"
+          },
+          "potAfter": {
+            "maximum": 9007199254740991.0,
+            "minimum": 0.0,
+            "title": "Potafter",
+            "type": "integer"
+          },
+          "potBefore": {
+            "maximum": 9007199254740991.0,
+            "minimum": 0.0,
+            "title": "Potbefore",
+            "type": "integer"
+          },
+          "sequence": {
+            "minimum": 1.0,
+            "title": "Sequence",
+            "type": "integer"
+          },
+          "street": {
+            "enum": [
+              0,
+              3,
+              4,
+              5
+            ],
+            "title": "Street",
+            "type": "integer"
+          },
+          "streetTotal": {
+            "maximum": 9007199254740991.0,
+            "minimum": 0.0,
+            "title": "Streettotal",
+            "type": "integer"
+          },
+          "toCall": {
+            "maximum": 9007199254740991.0,
+            "minimum": 0.0,
+            "title": "Tocall",
+            "type": "integer"
+          },
+          "totalCommitted": {
+            "maximum": 9007199254740991.0,
+            "minimum": 0.0,
+            "title": "Totalcommitted",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "sequence",
+          "street",
+          "player",
+          "action",
+          "amount",
+          "streetTotal",
+          "totalCommitted",
+          "toCall",
+          "highestBefore",
+          "minRaiseBefore",
+          "potBefore",
+          "potAfter",
+          "activePlayersBefore"
+        ],
+        "title": "ActionEvent",
         "type": "object"
       },
       "AnalysisRequest": {
@@ -152,6 +368,16 @@
             "minimum": 0.0,
             "title": "Pot Before Call",
             "type": "integer"
+          },
+          "pot_context": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PotContext"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "samples": {
             "default": 20000,
@@ -289,6 +515,44 @@
             ],
             "title": "Equity Standard Error"
           },
+          "expected_return": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Return"
+          },
+          "history_ranges": {
+            "items": {
+              "$ref": "#/components/schemas/HistoryRangeSummary"
+            },
+            "title": "History Ranges",
+            "type": "array"
+          },
+          "inference": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StrategyInference"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "limited_tree": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LimitedTreeSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "lose_probability": {
             "anyOf": [
               {
@@ -330,6 +594,13 @@
               }
             ],
             "title": "Pot Odds Ratio"
+          },
+          "pots": {
+            "items": {
+              "$ref": "#/components/schemas/PotEquity"
+            },
+            "title": "Pots",
+            "type": "array"
           },
           "recommendation": {
             "anyOf": [
@@ -413,6 +684,68 @@
         "title": "AnalysisResult",
         "type": "object"
       },
+      "EndEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "handEnd",
+            "title": "Kind",
+            "type": "string"
+          },
+          "pot": {
+            "maximum": 9007199254740991.0,
+            "minimum": 0.0,
+            "title": "Pot",
+            "type": "integer"
+          },
+          "reason": {
+            "enum": [
+              "allOthersFolded",
+              "showdown"
+            ],
+            "title": "Reason",
+            "type": "string"
+          },
+          "sequence": {
+            "minimum": 1.0,
+            "title": "Sequence",
+            "type": "integer"
+          },
+          "street": {
+            "enum": [
+              0,
+              3,
+              4,
+              5
+            ],
+            "title": "Street",
+            "type": "integer"
+          },
+          "winner": {
+            "anyOf": [
+              {
+                "maximum": 8.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Winner"
+          }
+        },
+        "required": [
+          "kind",
+          "sequence",
+          "street",
+          "reason",
+          "winner",
+          "pot"
+        ],
+        "title": "EndEvent",
+        "type": "object"
+      },
       "ExactOpponent": {
         "additionalProperties": false,
         "properties": {
@@ -460,6 +793,373 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "HistoryContext": {
+        "additionalProperties": false,
+        "properties": {
+          "big_blind": {
+            "exclusiveMinimum": 0.0,
+            "title": "Big Blind",
+            "type": "integer"
+          },
+          "complete": {
+            "title": "Complete",
+            "type": "boolean"
+          },
+          "count": {
+            "maximum": 9.0,
+            "minimum": 2.0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "cutoff_sequence": {
+            "maximum": 1000.0,
+            "minimum": 2.0,
+            "title": "Cutoff Sequence",
+            "type": "integer"
+          },
+          "dealer": {
+            "maximum": 8.0,
+            "minimum": 0.0,
+            "title": "Dealer",
+            "type": "integer"
+          },
+          "events": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "action": "#/components/schemas/ActionEvent",
+                  "handEnd": "#/components/schemas/EndEvent",
+                  "street": "#/components/schemas/StreetEvent"
+                },
+                "propertyName": "kind"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ActionEvent"
+                },
+                {
+                  "$ref": "#/components/schemas/StreetEvent"
+                },
+                {
+                  "$ref": "#/components/schemas/EndEvent"
+                }
+              ]
+            },
+            "maxItems": 1000,
+            "minItems": 2,
+            "title": "Events",
+            "type": "array"
+          },
+          "hand_id": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Hand Id",
+            "type": "string"
+          },
+          "opening_seats": {
+            "items": {
+              "maximum": 8.0,
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "maxItems": 9,
+            "minItems": 2,
+            "title": "Opening Seats",
+            "type": "array"
+          },
+          "schema_version": {
+            "const": 1,
+            "default": 1,
+            "title": "Schema Version",
+            "type": "integer"
+          },
+          "small_blind": {
+            "exclusiveMinimum": 0.0,
+            "title": "Small Blind",
+            "type": "integer"
+          },
+          "stacks": {
+            "anyOf": [
+              {
+                "items": {
+                  "maximum": 9007199254740991.0,
+                  "minimum": 0.0,
+                  "type": "integer"
+                },
+                "maxItems": 9,
+                "minItems": 2,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stacks"
+          }
+        },
+        "required": [
+          "hand_id",
+          "cutoff_sequence",
+          "complete",
+          "count",
+          "opening_seats",
+          "dealer",
+          "small_blind",
+          "big_blind",
+          "events"
+        ],
+        "title": "HistoryContext",
+        "type": "object"
+      },
+      "HistoryRangeSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "combos": {
+            "title": "Combos",
+            "type": "integer"
+          },
+          "effective_combos": {
+            "title": "Effective Combos",
+            "type": "number"
+          },
+          "observed_actions": {
+            "title": "Observed Actions",
+            "type": "integer"
+          },
+          "seat": {
+            "title": "Seat",
+            "type": "integer"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "value_share": {
+            "title": "Value Share",
+            "type": "number"
+          }
+        },
+        "required": [
+          "seat",
+          "observed_actions",
+          "combos",
+          "effective_combos",
+          "value_share",
+          "source"
+        ],
+        "title": "HistoryRangeSummary",
+        "type": "object"
+      },
+      "InferenceTrace": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "after": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "After",
+            "type": "object"
+          },
+          "before": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Before",
+            "type": "object"
+          },
+          "board": {
+            "items": {
+              "maximum": 51.0,
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "title": "Board",
+            "type": "array"
+          },
+          "context": {
+            "title": "Context",
+            "type": "string"
+          },
+          "rule_id": {
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "sequence": {
+            "title": "Sequence",
+            "type": "integer"
+          },
+          "street": {
+            "enum": [
+              0,
+              3,
+              4,
+              5
+            ],
+            "title": "Street",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sequence",
+          "street",
+          "action",
+          "board",
+          "rule_id",
+          "context",
+          "before",
+          "after"
+        ],
+        "title": "InferenceTrace",
+        "type": "object"
+      },
+      "InferredHandClass": {
+        "additionalProperties": false,
+        "properties": {
+          "combos": {
+            "title": "Combos",
+            "type": "integer"
+          },
+          "hand": {
+            "title": "Hand",
+            "type": "string"
+          },
+          "probability": {
+            "title": "Probability",
+            "type": "number"
+          }
+        },
+        "required": [
+          "hand",
+          "probability",
+          "combos"
+        ],
+        "title": "InferredHandClass",
+        "type": "object"
+      },
+      "LimitedTreeSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "elapsed_ms": {
+            "title": "Elapsed Ms",
+            "type": "number"
+          },
+          "horizon": {
+            "title": "Horizon",
+            "type": "string"
+          },
+          "marginal": {
+            "title": "Marginal",
+            "type": "boolean"
+          },
+          "sample_count_per_scenario": {
+            "title": "Sample Count Per Scenario",
+            "type": "integer"
+          },
+          "scenarios": {
+            "items": {
+              "$ref": "#/components/schemas/TreeScenario"
+            },
+            "title": "Scenarios",
+            "type": "array"
+          },
+          "stable_actions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Stable Actions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "horizon",
+          "scenarios",
+          "stable_actions",
+          "marginal",
+          "sample_count_per_scenario",
+          "elapsed_ms"
+        ],
+        "title": "LimitedTreeSummary",
+        "type": "object"
+      },
+      "PotContext": {
+        "additionalProperties": false,
+        "properties": {
+          "betting_closed_after_call": {
+            "default": false,
+            "title": "Betting Closed After Call",
+            "type": "boolean"
+          },
+          "contributions": {
+            "items": {
+              "maximum": 9007199254740991.0,
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "maxItems": 9,
+            "minItems": 2,
+            "title": "Contributions",
+            "type": "array"
+          },
+          "folded_contributions": {
+            "items": {
+              "maximum": 9007199254740991.0,
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "maxItems": 7,
+            "title": "Folded Contributions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "contributions"
+        ],
+        "title": "PotContext",
+        "type": "object"
+      },
+      "PotEquity": {
+        "additionalProperties": false,
+        "properties": {
+          "amount": {
+            "maximum": 9007199254740991.0,
+            "minimum": 0.0,
+            "title": "Amount",
+            "type": "integer"
+          },
+          "eligible": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Eligible",
+            "type": "array"
+          },
+          "equity": {
+            "title": "Equity",
+            "type": "number"
+          },
+          "expected_return": {
+            "title": "Expected Return",
+            "type": "number"
+          },
+          "is_refund": {
+            "default": false,
+            "title": "Is Refund",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "amount",
+          "eligible",
+          "equity",
+          "expected_return"
+        ],
+        "title": "PotEquity",
+        "type": "object"
+      },
       "RandomOpponent": {
         "additionalProperties": false,
         "properties": {
@@ -493,7 +1193,7 @@
           },
           "text": {
             "default": "",
-            "maxLength": 12000,
+            "maxLength": 65536,
             "title": "Text",
             "type": "string"
           }
@@ -558,7 +1258,7 @@
             "type": "array"
           },
           "text": {
-            "maxLength": 12000,
+            "maxLength": 65536,
             "minLength": 1,
             "title": "Text",
             "type": "string"
@@ -568,6 +1268,443 @@
           "text"
         ],
         "title": "RangePreviewRequest",
+        "type": "object"
+      },
+      "RiverScenarioSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "best_amounts": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Best Amounts",
+            "type": "array"
+          },
+          "best_ev": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Best Ev"
+          },
+          "check_ev": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Check Ev"
+          },
+          "equity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Equity"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "status": {
+            "default": "ok",
+            "enum": [
+              "ok",
+              "insufficient-data"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "RiverScenarioSummary",
+        "type": "object"
+      },
+      "SensitivityOutcome": {
+        "additionalProperties": false,
+        "properties": {
+          "bluff_bias": {
+            "title": "Bluff Bias",
+            "type": "number"
+          },
+          "clipped_mass": {
+            "default": 0,
+            "title": "Clipped Mass",
+            "type": "number"
+          },
+          "combos": {
+            "items": {
+              "$ref": "#/components/schemas/WeightedCombo"
+            },
+            "title": "Combos",
+            "type": "array"
+          },
+          "composition": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Composition",
+            "type": "object"
+          },
+          "equity_delta": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Equity Delta"
+          },
+          "ev_delta": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ev Delta"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AnalysisResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "ok",
+              "insufficient-data",
+              "unsupported",
+              "error",
+              "timed-out",
+              "cancelled"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "traces": {
+            "items": {
+              "$ref": "#/components/schemas/InferenceTrace"
+            },
+            "title": "Traces",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "bluff_bias",
+          "status"
+        ],
+        "title": "SensitivityOutcome",
+        "type": "object"
+      },
+      "SensitivityRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "base_analysis": {
+            "$ref": "#/components/schemas/AnalysisRequest"
+          },
+          "history_context": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HistoryContext"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mode": {
+            "default": "history",
+            "enum": [
+              "history",
+              "manual"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "model_version": {
+            "const": "history-rules-v1",
+            "default": "history-rules-v1",
+            "title": "Model Version",
+            "type": "string"
+          },
+          "opponent_seats": {
+            "items": {
+              "maximum": 8.0,
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "maxItems": 8,
+            "minItems": 1,
+            "title": "Opponent Seats",
+            "type": "array"
+          },
+          "preflop_prior": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RangeOpponent"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "scenarios": {
+            "items": {
+              "$ref": "#/components/schemas/SensitivityScenario"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "title": "Scenarios",
+            "type": "array"
+          },
+          "schema_version": {
+            "const": 1,
+            "default": 1,
+            "title": "Schema Version",
+            "type": "integer"
+          },
+          "target_seat": {
+            "maximum": 8.0,
+            "minimum": 0.0,
+            "title": "Target Seat",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "base_analysis",
+          "target_seat",
+          "opponent_seats"
+        ],
+        "title": "SensitivityRequest",
+        "type": "object"
+      },
+      "SensitivityResult": {
+        "additionalProperties": false,
+        "properties": {
+          "cutoff_sequence": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cutoff Sequence"
+          },
+          "elapsed_ms": {
+            "title": "Elapsed Ms",
+            "type": "number"
+          },
+          "model_version": {
+            "default": "history-rules-v1",
+            "title": "Model Version",
+            "type": "string"
+          },
+          "outcomes": {
+            "items": {
+              "$ref": "#/components/schemas/SensitivityOutcome"
+            },
+            "title": "Outcomes",
+            "type": "array"
+          },
+          "prior_source": {
+            "title": "Prior Source",
+            "type": "string"
+          },
+          "request_hash": {
+            "title": "Request Hash",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": 1,
+            "default": 1,
+            "title": "Schema Version",
+            "type": "integer"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "target_seat": {
+            "maximum": 8.0,
+            "minimum": 0.0,
+            "title": "Target Seat",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "request_hash",
+          "target_seat",
+          "prior_source",
+          "cutoff_sequence",
+          "warnings",
+          "outcomes",
+          "summary",
+          "elapsed_ms"
+        ],
+        "title": "SensitivityResult",
+        "type": "object"
+      },
+      "SensitivityScenario": {
+        "additionalProperties": false,
+        "properties": {
+          "bluff_bias": {
+            "default": 0,
+            "maximum": 3.0,
+            "minimum": -3.0,
+            "title": "Bluff Bias",
+            "type": "number"
+          },
+          "current_range": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RangeOpponent"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "pattern": "^[a-zA-Z0-9_-]{1,40}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "SensitivityScenario",
+        "type": "object"
+      },
+      "SensitivityTaskSnapshot": {
+        "additionalProperties": false,
+        "properties": {
+          "completion": {
+            "default": "none",
+            "enum": [
+              "complete",
+              "partial",
+              "none"
+            ],
+            "title": "Completion",
+            "type": "string"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "progress": {
+            "title": "Progress",
+            "type": "number"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SensitivityResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "running",
+              "cancelling",
+              "succeeded",
+              "failed",
+              "cancelled",
+              "expired"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_id",
+          "status",
+          "progress"
+        ],
+        "title": "SensitivityTaskSnapshot",
         "type": "object"
       },
       "StrategyIdentity": {
@@ -592,6 +1729,121 @@
           "version"
         ],
         "title": "StrategyIdentity",
+        "type": "object"
+      },
+      "StrategyInference": {
+        "additionalProperties": false,
+        "properties": {
+          "clipped_mass": {
+            "default": 0,
+            "title": "Clipped Mass",
+            "type": "number"
+          },
+          "cutoff_sequence": {
+            "title": "Cutoff Sequence",
+            "type": "integer"
+          },
+          "effective_combos": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective Combos"
+          },
+          "effective_stack": {
+            "maximum": 9007199254740991.0,
+            "minimum": 0.0,
+            "title": "Effective Stack",
+            "type": "integer"
+          },
+          "evidence": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "hand_id": {
+            "title": "Hand Id",
+            "type": "string"
+          },
+          "model_version": {
+            "title": "Model Version",
+            "type": "string"
+          },
+          "observed_actions": {
+            "title": "Observed Actions",
+            "type": "integer"
+          },
+          "opponent_seat": {
+            "title": "Opponent Seat",
+            "type": "integer"
+          },
+          "posterior_combos": {
+            "title": "Posterior Combos",
+            "type": "integer"
+          },
+          "range_classes": {
+            "items": {
+              "$ref": "#/components/schemas/InferredHandClass"
+            },
+            "title": "Range Classes",
+            "type": "array"
+          },
+          "scenarios": {
+            "items": {
+              "$ref": "#/components/schemas/RiverScenarioSummary"
+            },
+            "title": "Scenarios",
+            "type": "array"
+          },
+          "sensitivity_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sensitivity Summary"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "stable_amounts": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Stable Amounts",
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "source",
+          "model_version",
+          "hand_id",
+          "cutoff_sequence",
+          "opponent_seat",
+          "effective_stack",
+          "posterior_combos",
+          "observed_actions",
+          "evidence",
+          "warnings"
+        ],
+        "title": "StrategyInference",
         "type": "object"
       },
       "StrategyList": {
@@ -720,6 +1972,55 @@
         "title": "StrategySelection",
         "type": "object"
       },
+      "StreetEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "board": {
+            "anyOf": [
+              {
+                "items": {
+                  "maximum": 51.0,
+                  "minimum": 0.0,
+                  "type": "integer"
+                },
+                "maxItems": 5,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Board"
+          },
+          "kind": {
+            "const": "street",
+            "title": "Kind",
+            "type": "string"
+          },
+          "sequence": {
+            "minimum": 1.0,
+            "title": "Sequence",
+            "type": "integer"
+          },
+          "street": {
+            "enum": [
+              3,
+              4,
+              5
+            ],
+            "title": "Street",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "sequence",
+          "street",
+          "board"
+        ],
+        "title": "StreetEvent",
+        "type": "object"
+      },
       "TaskCreated": {
         "additionalProperties": false,
         "properties": {
@@ -827,6 +2128,33 @@
           "total_samples"
         ],
         "title": "TaskSnapshot",
+        "type": "object"
+      },
+      "TreeScenario": {
+        "additionalProperties": false,
+        "properties": {
+          "best_actions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Best Actions",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "best_actions"
+        ],
+        "title": "TreeScenario",
         "type": "object"
       },
       "ValidationError": {
@@ -1065,6 +2393,122 @@
           }
         },
         "summary": "Range Preview"
+      }
+    },
+    "/api/v1/sensitivity-analyses": {
+      "post": {
+        "operationId": "submit_sensitivity_api_v1_sensitivity_analyses_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SensitivityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskCreated"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Submit Sensitivity"
+      }
+    },
+    "/api/v1/sensitivity-analyses/{task_id}": {
+      "get": {
+        "operationId": "get_sensitivity_api_v1_sensitivity_analyses__task_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "title": "Task Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SensitivityTaskSnapshot"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Sensitivity"
+      }
+    },
+    "/api/v1/sensitivity-analyses/{task_id}/cancel": {
+      "post": {
+        "operationId": "cancel_sensitivity_api_v1_sensitivity_analyses__task_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "title": "Task Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SensitivityTaskSnapshot"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cancel Sensitivity"
       }
     },
     "/api/v1/strategies": {

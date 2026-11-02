@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useScenario } from "../../state";
 import type { Strategy } from "../../api/client";
 import type { Draft } from "../../model";
+import RiverBetSettings from "./RiverBetSettings";
 import s from "./AnalysisSettings.module.css";
 import ui from "../../shared/ui/Shared.module.css";
 
@@ -82,6 +83,7 @@ export default function AnalysisSettings({
             </label>
           )}
         </fieldset>
+        {draft.strategyIds.includes("river-bet") && <RiverBetSettings />}
         <div className={s.computeSettings}>
           <label htmlFor="shared-samples">精细分析模拟精度</label>
           <select
