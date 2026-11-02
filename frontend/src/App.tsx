@@ -8,6 +8,8 @@ import TableSettings from "./features/table/TableSettings";
 import AnalysisSettings from "./features/analysis/AnalysisSettings";
 import OpponentSettings from "./features/opponents/OpponentSettings";
 import QuickAnalysis from "./features/analysis/QuickAnalysis";
+import QuickAnalysisDetails from "./features/analysis/QuickAnalysisDetails";
+import { useQuickAnalysis } from "./features/analysis/useQuickAnalysis";
 import { Card } from "./shared/cards/Card";
 import { CardPicker } from "./shared/cards/CardPicker";
 import { useCardSelection } from "./shared/cards/useCardSelection";
@@ -52,6 +54,7 @@ export default function App() {
     retryConnection,
     markOnline,
   } = useStrategies();
+  const quickAnalysis = useQuickAnalysis(connectionAttempt);
   const analysis = useDetailedAnalysis(() => {
     setMessage("");
     showAnalysis();
@@ -133,7 +136,7 @@ export default function App() {
             onSelect={selectPanel}
             status={taskStatus}
           >
-            <QuickAnalysis retryKey={connectionAttempt} />
+            <QuickAnalysis analysis={quickAnalysis} />
           </WorkspaceBar>
           <div className={w.notice} ref={notice}>
             {errors.length > 0 && (
@@ -199,6 +202,7 @@ export default function App() {
             </WorkspacePanel>
             <WorkspacePanel id="analysis" active={activePanel}>
               <AnalysisSettings strategies={strategies} />
+              <QuickAnalysisDetails analysis={quickAnalysis} />
               <AnalysisPanel
                 analysis={analysis}
                 strategies={strategies}

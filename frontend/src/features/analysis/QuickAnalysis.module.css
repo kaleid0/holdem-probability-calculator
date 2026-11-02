@@ -162,3 +162,24 @@
     font-size: 18px;
   }
 }
+
+.analysisDetails {
+  min-width: 0;
+}
+.analysisDetails > h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+.analysisDetails p,
+.analysisDetails li {
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.analysisDetails .details,
+.analysisDetails .actionEv details {
+  max-height: none;
+}
+.analysisDetails .details {
+  overflow-x: auto;
+}

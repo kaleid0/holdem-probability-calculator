@@ -94,13 +94,18 @@ test("limited tree runs in the background and compares call versus fold", async 
   const quick = page.getByRole("region", { name: "快速分析", exact: true });
   await expect.poll(() => submitted).toBe(true);
   await expect(quick).toContainText("行动修正权益");
-  await expect(quick).toContainText("正在比较翻牌/转牌有限行动树");
+  await openTab(page, "精细分析");
+  const details = page.getByRole("region", {
+    name: "快速分析说明",
+    exact: true,
+  });
+  await expect(details).toContainText("正在比较翻牌/转牌有限行动树");
   release();
   await expect(
-    quick.getByText("查看有限行动树与动作比较", { exact: true }),
+    details.getByText("查看有限行动树与动作比较", { exact: true }),
   ).toBeVisible();
-  await quick.getByText("查看有限行动树与动作比较", { exact: true }).click();
-  const table = quick.getByRole("table", { name: "翻牌转牌候选动作" });
+  await details.getByText("查看有限行动树与动作比较", { exact: true }).click();
+  const table = details.getByRole("table", { name: "翻牌转牌候选动作" });
   await expect(table.getByRole("row")).toHaveCount(3);
   await expect(table).toContainText("跟注 60");
   await expect(table).toContainText("较弃牌");
@@ -135,11 +140,17 @@ test("tree failure can be retried without losing prior analysis", async ({
   });
   await page.goto("/");
   const quick = page.getByRole("region", { name: "快速分析", exact: true });
-  await expect(quick).toContainText("有限树分析暂不可用");
+  await expect(quick.getByLabel("快速底池权益百分比")).not.toHaveText("—");
+  await openTab(page, "精细分析");
+  const details = page.getByRole("region", {
+    name: "快速分析说明",
+    exact: true,
+  });
+  await expect(details).toContainText("有限树分析暂不可用");
   const prior = otherCount;
-  await quick.getByRole("button", { name: "重试有限树" }).click();
+  await details.getByRole("button", { name: "重试有限树" }).click();
   await expect(
-    quick.getByText("查看有限行动树与动作比较", { exact: true }),
+    details.getByText("查看有限行动树与动作比较", { exact: true }),
   ).toBeVisible();
   expect(otherCount).toBe(prior);
 });

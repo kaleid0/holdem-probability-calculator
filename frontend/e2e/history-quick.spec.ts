@@ -1,3 +1,4 @@
+import { openTab } from "./workspace";
 import { expect, test } from "@playwright/test";
 import { readFileSync } from "node:fs";
 
@@ -92,14 +93,19 @@ test("action ranges update after the baseline, survive undo, and fit mobile", as
   await page.goto("/");
   const quick = page.getByRole("region", { name: "快速分析", exact: true });
   await expect.poll(() => requested).toBe(true);
-  await expect(quick).toContainText("正在根据本手行动");
+  await openTab(page, "精细分析");
+  const details = page.getByRole("region", {
+    name: "快速分析说明",
+    exact: true,
+  });
+  await expect(details).toContainText("正在根据本手行动");
   await expect(quick.getByLabel("快速底池权益百分比")).not.toHaveText("—");
   release();
   await expect(quick).toContainText("行动修正权益");
-  await expect(quick).toContainText("已按本手行动更新随机对手范围");
+  await expect(details).toContainText("已按本手行动更新随机对手范围");
   const equity = await quick.getByLabel("快速底池权益百分比").innerText();
-  await quick.getByText("查看依据与适用条件", { exact: true }).click();
-  await expect(quick.getByLabel("行动范围摘要")).toContainText(
+  await details.getByText("查看依据与适用条件", { exact: true }).click();
+  await expect(details.getByLabel("行动范围摘要")).toContainText(
     "玩家 2：3 次行动",
   );
   await page.setViewportSize({ width: 390, height: 844 });
@@ -112,6 +118,7 @@ test("action ranges update after the baseline, survive undo, and fit mobile", as
     path: testInfo.outputPath("action-ranges-mobile.png"),
     fullPage: true,
   });
+  await openTab(page, "当前牌局");
   const live = page.getByRole("region", { name: "真实牌局", exact: true });
   await live.getByRole("button", { name: "跟注 60", exact: true }).click();
   await expect(quick).not.toContainText("行动修正权益");

@@ -1,3 +1,4 @@
+import { openTab } from "./workspace";
 import { expect, test } from "@playwright/test";
 import { readFileSync } from "node:fs";
 
@@ -92,9 +93,14 @@ test("quick river model runs after the baseline and keeps it visible while delay
   await expect(quick).toContainText("已更新至当前牌局");
   await expect.poll(() => riverSubmitted).toBe(true);
   await expect(quick.getByLabel("快速底池权益百分比")).not.toHaveText("—");
-  await expect(quick).toContainText("正在自动比较河牌下注");
+  await openTab(page, "精细分析");
+  const details = page.getByRole("region", {
+    name: "快速分析说明",
+    exact: true,
+  });
+  await expect(details).toContainText("正在自动比较河牌下注");
   release();
-  const advice = quick.getByLabel("快速行动建议");
+  const advice = details;
   await expect(advice).toContainText(/三种假设下均为最优候选|对对手假设敏感/);
   await advice.getByText("查看依据与适用条件", { exact: true }).click();
   await expect(
@@ -129,13 +135,16 @@ test("advanced failure and retry preserve the baseline without resubmitting it",
   });
   await page.goto("/");
   const quick = page.getByRole("region", { name: "快速分析", exact: true });
-  await expect(quick).toContainText("河牌分析暂不可用");
+  await openTab(page, "精细分析");
+  const details = page.getByRole("region", {
+    name: "快速分析说明",
+    exact: true,
+  });
+  await expect(details).toContainText("河牌分析暂不可用");
   const equity = await quick.getByLabel("快速底池权益百分比").innerText();
   const count = baselineCount;
-  await quick.getByRole("button", { name: "重试河牌分析" }).click();
-  await expect(quick.getByLabel("快速行动建议")).toContainText(
-    /三种假设下均为最优候选|对对手假设敏感/,
-  );
+  await details.getByRole("button", { name: "重试河牌分析" }).click();
+  await expect(details).toContainText(/三种假设下均为最优候选|对对手假设敏感/);
   expect(baselineCount).toBe(count);
   await expect(quick.getByLabel("快速底池权益百分比")).toHaveText(equity);
 });

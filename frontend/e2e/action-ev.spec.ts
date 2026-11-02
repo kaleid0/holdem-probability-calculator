@@ -1,3 +1,4 @@
+import { openTab } from "./workspace";
 import { expect, test } from "@playwright/test";
 import { emptyDraft } from "../src/model";
 import { createGame, startGame } from "../src/liveGame";
@@ -26,6 +27,12 @@ test("current action EV updates response assumptions and clears stale results", 
     { draft, game },
   );
   await page.goto("/");
+  await expect(
+    page
+      .getByRole("region", { name: "快速分析", exact: true })
+      .getByRole("table"),
+  ).toHaveCount(0);
+  await openTab(page, "精细分析");
   const panel = page.getByLabel("当前行动 EV 比较");
   await expect(panel.getByRole("table")).toBeVisible();
   await expect(panel).toContainText("跟注 5");
@@ -41,6 +48,7 @@ test("current action EV updates response assumptions and clears stale results", 
     route.fulfill({ status: 503, json: {} }),
   );
   await page.reload();
+  await openTab(page, "精细分析");
   await expect(panel.getByRole("table")).toHaveCount(0);
   await expect(panel).toContainText("等待当前牌局权益计算完成");
 });
