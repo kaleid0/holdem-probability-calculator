@@ -11,8 +11,10 @@ import { toRequest } from "../../analysisRequest";
 import { riverReadiness } from "../../riverReadiness";
 import { defaultRiverBet } from "../../riverBet";
 import { postflopReady } from "../../postflopTree";
+import { useDecisionAdvice } from "./useDecisionAdvice";
 type Snapshot = {
   input: string;
+  taskId?: string;
   result?: AnalysisResult;
   error?: string;
 };
@@ -119,6 +121,49 @@ export function useQuickAnalysis(retryKey: number) {
     treeInput,
     JSON.stringify([treeInput, identity, treeRetry]),
   );
+  const historyContext =
+    game?.historyComplete &&
+    game.stacks &&
+    input &&
+    toRequest(quickDraft, game).pot_context
+      ? {
+          schema_version: 1 as const,
+          hand_id: game.handId ?? "legacy-recording",
+          cutoff_sequence: game.events.length,
+          complete: game.historyComplete,
+          count: game.count,
+          opening_seats:
+            game.openingSeats ??
+            game.stacks.flatMap((n, i) => (n > 0 ? [i] : [])),
+          dealer: game.dealer,
+          small_blind: game.smallBlind,
+          big_blind: game.bigBlind,
+          stacks: game.stacks,
+          events: game.events,
+        }
+      : null;
+  const decision = useDecisionAdvice(
+    input
+      ? {
+          base_analysis: {
+            ...toRequest(quickDraft, game),
+            equity_method: "monteCarlo",
+          },
+          recorded: !!game,
+          history_context: historyContext,
+          opponent_seats: draft.opponents.flatMap((o, i) =>
+            o.folded ? [] : [i + 1],
+          ),
+          sources: {
+            baseline: baseline.current?.taskId,
+            history: history.current?.taskId,
+            river: river.current?.taskId,
+            tree: tree.current?.taskId,
+          },
+        }
+      : null,
+    identity,
+  );
   return {
     ...baseline,
     unavailable,
@@ -126,6 +171,7 @@ export function useQuickAnalysis(retryKey: number) {
     history,
     tree,
     readiness,
+    decision,
     draft,
     game,
     retry: () => setRetry((n) => n + 1),
@@ -162,6 +208,7 @@ function useQuickTask(input: string, identity: string) {
         finished = true;
         setSnapshot({
           input: identity,
+          taskId: task.result ? taskId : undefined,
           result: task.result ?? undefined,
           error: task.result
             ? undefined

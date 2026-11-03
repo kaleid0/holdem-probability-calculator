@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createGame, startGame } from "./liveGame";
 import { emptyDraft } from "./model";
-import type { AnalysisResult } from "./api/client";
-import { postflopReady, treeAdvice } from "./postflopTree";
+import { postflopReady } from "./postflopTree";
 
 const game = {
   ...startGame(createGame(2, 0, 5, 10, [1000, 1000])),
@@ -32,26 +31,5 @@ describe("limited tree readiness and advice", () => {
     );
     expect(postflopReady({ ...draft, call: "5" }, game)).toBe(false);
     expect(postflopReady({ ...draft, board: [] }, game)).toBe(false);
-  });
-  it("withholds a firm recommendation when paired errors overlap the best two actions", () => {
-    const result: Pick<AnalysisResult, "limited_tree" | "candidates"> = {
-      limited_tree: {
-        horizon: "测试有限树",
-        sample_count_per_scenario: 1000,
-        elapsed_ms: 1,
-        marginal: true,
-        stable_actions: [],
-        scenarios: [
-          { id: "baseline", name: "基准", best_actions: ["下注 10"] },
-        ],
-      },
-    };
-    expect(treeAdvice(result)?.title).toContain("暂不下结论");
-    expect(treeAdvice(result)?.stability).toContain("敏感");
-    result.limited_tree!.marginal = false;
-    result.limited_tree!.stable_actions = ["下注 10"];
-    expect(treeAdvice(result)?.title).toBe("有限树倾向下注 10");
-    expect(treeAdvice(result)?.stability).toContain("一致");
-    expect(treeAdvice()).toBeNull();
   });
 });

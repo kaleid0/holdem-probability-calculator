@@ -163,6 +163,57 @@
         "title": "ActionAssessment",
         "type": "object"
       },
+      "ActionEvComparison": {
+        "additionalProperties": false,
+        "properties": {
+          "best": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Best",
+            "type": "array"
+          },
+          "model_version": {
+            "default": "independent-response-v1",
+            "title": "Model Version",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/EvRow"
+            },
+            "title": "Rows",
+            "type": "array"
+          },
+          "scenarios": {
+            "items": {
+              "$ref": "#/components/schemas/EvScenario"
+            },
+            "title": "Scenarios",
+            "type": "array"
+          },
+          "stable": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Stable",
+            "type": "array"
+          }
+        },
+        "title": "ActionEvComparison",
+        "type": "object"
+      },
       "ActionEvent": {
         "additionalProperties": false,
         "properties": {
@@ -276,6 +327,102 @@
           "activePlayersBefore"
         ],
         "title": "ActionEvent",
+        "type": "object"
+      },
+      "AdviceAction": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "enum": [
+              "fold",
+              "check",
+              "call",
+              "bet",
+              "raise"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "amount": {
+            "default": 0,
+            "maximum": 9007199254740991.0,
+            "minimum": 0.0,
+            "title": "Amount",
+            "type": "integer"
+          },
+          "amount_kind": {
+            "default": "additional",
+            "enum": [
+              "additional",
+              "street_total"
+            ],
+            "title": "Amount Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "title": "AdviceAction",
+        "type": "object"
+      },
+      "AdviceSources": {
+        "additionalProperties": false,
+        "properties": {
+          "baseline": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline"
+          },
+          "history": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "History"
+          },
+          "river": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "River"
+          },
+          "tree": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tree"
+          }
+        },
+        "title": "AdviceSources",
         "type": "object"
       },
       "AnalysisRequest": {
@@ -684,6 +831,194 @@
         "title": "AnalysisResult",
         "type": "object"
       },
+      "DecisionAdvice": {
+        "additionalProperties": false,
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/AdviceAction"
+            },
+            "title": "Actions",
+            "type": "array"
+          },
+          "code": {
+            "enum": [
+              "recommendation",
+              "review",
+              "marginal",
+              "waiting",
+              "no-call",
+              "unavailable"
+            ],
+            "title": "Code",
+            "type": "string"
+          },
+          "model_version": {
+            "title": "Model Version",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "reserve": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reserve"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "stability": {
+            "title": "Stability",
+            "type": "string"
+          },
+          "threshold": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "model_version",
+          "code",
+          "title",
+          "reason",
+          "stability"
+        ],
+        "title": "DecisionAdvice",
+        "type": "object"
+      },
+      "DecisionAdviceRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "base_analysis": {
+            "$ref": "#/components/schemas/AnalysisRequest"
+          },
+          "history_context": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HistoryContext"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "opponent_seats": {
+            "items": {
+              "maximum": 8.0,
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "maxItems": 8,
+            "title": "Opponent Seats",
+            "type": "array"
+          },
+          "recorded": {
+            "default": false,
+            "title": "Recorded",
+            "type": "boolean"
+          },
+          "response_model": {
+            "$ref": "#/components/schemas/ResponseModel"
+          },
+          "sources": {
+            "$ref": "#/components/schemas/AdviceSources"
+          }
+        },
+        "required": [
+          "base_analysis"
+        ],
+        "title": "DecisionAdviceRequest",
+        "type": "object"
+      },
+      "DecisionAdviceResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "advanced": {
+            "title": "Advanced",
+            "type": "boolean"
+          },
+          "advice": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DecisionAdvice"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "comparison": {
+            "$ref": "#/components/schemas/ActionEvComparison"
+          },
+          "fallback": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DecisionAdvice"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "fallback_reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Fallback Reasons",
+            "type": "array"
+          },
+          "model_version": {
+            "default": "decision-policy-v1",
+            "title": "Model Version",
+            "type": "string"
+          },
+          "opening_advice": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DecisionAdvice"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "response_model": {
+            "$ref": "#/components/schemas/ResponseModel"
+          }
+        },
+        "required": [
+          "advice",
+          "opening_advice",
+          "fallback",
+          "fallback_reasons",
+          "comparison",
+          "response_model",
+          "advanced"
+        ],
+        "title": "DecisionAdviceResponse",
+        "type": "object"
+      },
       "EndEvent": {
         "additionalProperties": false,
         "properties": {
@@ -744,6 +1079,81 @@
           "pot"
         ],
         "title": "EndEvent",
+        "type": "object"
+      },
+      "EvRow": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/AdviceAction"
+          },
+          "additional": {
+            "maximum": 9007199254740991.0,
+            "minimum": 0.0,
+            "title": "Additional",
+            "type": "integer"
+          },
+          "errors": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Errors",
+            "type": "array"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "values": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Values",
+            "type": "array"
+          }
+        },
+        "required": [
+          "label",
+          "action",
+          "additional",
+          "values",
+          "errors"
+        ],
+        "title": "EvRow",
+        "type": "object"
+      },
+      "EvScenario": {
+        "additionalProperties": false,
+        "properties": {
+          "equity": {
+            "title": "Equity",
+            "type": "number"
+          },
+          "fold": {
+            "title": "Fold",
+            "type": "number"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "probe": {
+            "title": "Probe",
+            "type": "number"
+          },
+          "raise": {
+            "title": "Raise",
+            "type": "number"
+          }
+        },
+        "required": [
+          "name",
+          "equity",
+          "fold",
+          "raise",
+          "probe"
+        ],
+        "title": "EvScenario",
         "type": "object"
       },
       "ExactOpponent": {
@@ -1268,6 +1678,34 @@
           "text"
         ],
         "title": "RangePreviewRequest",
+        "type": "object"
+      },
+      "ResponseModel": {
+        "additionalProperties": false,
+        "properties": {
+          "fold": {
+            "default": 0.25,
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Fold",
+            "type": "number"
+          },
+          "probe": {
+            "default": 0.35,
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Probe",
+            "type": "number"
+          },
+          "raise": {
+            "default": 0.08,
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Raise",
+            "type": "number"
+          }
+        },
+        "title": "ResponseModel",
         "type": "object"
       },
       "RiverScenarioSummary": {
@@ -2355,6 +2793,44 @@
           }
         },
         "summary": "Cancel Analysis"
+      }
+    },
+    "/api/v1/decision-advice": {
+      "post": {
+        "operationId": "get_decision_advice_api_v1_decision_advice_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionAdviceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionAdviceResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Decision Advice"
       }
     },
     "/api/v1/ranges/preview": {

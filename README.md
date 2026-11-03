@@ -32,6 +32,8 @@ pnpm --dir frontend dev --host 127.0.0.1 --port 5173 --strictPort
 
 前端通过 Vite 代理调用 `/api`，无需配置跨域。第一版为本地开发程序；生产部署需用同源反向代理提供前端及 `/api`，并为公开服务配置身份、配额与共享任务存储。
 
+行动建议与候选 EV 统一由后端生成：翻前规则、保守跟注门槛、抽样临界判断及策略回退均已迁移；前端提交当前局面与分析任务 ID，只处理交互和展示。接口、分层和保留在本地的规则边界见 [行动建议职责边界](docs/BACKEND_DECISIONS.md)。
+
 ## 当前功能
 
 第三期已加入翻牌/转牌有限行动树：适用的单挑后位局面自动比较当前动作及下一街固定应对，对照三种对手假设，显示模型 EV、抽样误差和建议稳定性。基础结果先显示，有限树在后台补充；也可在精细分析中手动运行。支持范围、树深和性能实测见 [第三期说明](docs/PHASE_3.md)。
@@ -117,6 +119,7 @@ GET  /health
 GET  /api/v1/strategies
 POST /api/v1/ranges/preview
 POST /api/v1/analyses
+POST /api/v1/decision-advice
 GET  /api/v1/analyses/{task_id}
 POST /api/v1/analyses/{task_id}/cancel
 ```

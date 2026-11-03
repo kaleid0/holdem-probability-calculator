@@ -26,7 +26,7 @@ export default function QuickAnalysisDetails({
     retryHistory,
     retryRiver,
   } = analysis;
-  const { result, advice, openingAdvice, fallback } =
+  const { advice, openingAdvice, fallback } =
     quickAnalysisPresentation(analysis);
   return (
     <section
@@ -45,12 +45,7 @@ export default function QuickAnalysisDetails({
       </p>
       {current?.error && <button onClick={retry}>重试快速分析</button>}
       {!unavailable && game?.phase === "betting" && game.actor === 0 && (
-        <ActionEvPanel
-          draft={draft}
-          result={result}
-          game={game}
-          advanced={!!tree.result || !!river.result}
-        />
+        <ActionEvPanel decision={analysis.decision} />
       )}
       {advice && (
         <div className={s.advice} aria-label="行动建议依据">
@@ -108,7 +103,7 @@ export default function QuickAnalysisDetails({
                 BB 以下、已有多次加注或全下的局面需单独复核。
               </p>
             )}
-            {advice === fallback && (
+            {advice.source === "continuation-rules" && fallback && (
               <p>
                 后续行动参考适用于记录完整且轮到你的局面。它使用当前范围权益、底池赔率及固定保守余量，不是完整策略求解；免费行动默认过牌，全下及边池不套用单一门槛。有限行动树和河牌候选比较完成后优先显示其结果。
               </p>

@@ -4,7 +4,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import ValidationError
 
-from poker_calculator.application.tasks import QueueFullError, TaskService
+from poker_calculator.application.advice import decision_advice, resolve_results
+from poker_calculator.application.tasks import QueueFullError, TaskResultUnavailable, TaskService
+from poker_calculator.domain.advice import DecisionAdviceRequest, DecisionAdviceResponse
 from poker_calculator.domain.models import (
     AnalysisRequest,
     RangePreview,
@@ -39,6 +41,20 @@ def create_app() -> FastAPI:
     @application.get("/health")
     async def health() -> dict[str, str]:
         return {"status": "ok", "version": "0.2.0"}
+
+    @application.post("/api/v1/decision-advice", response_model=DecisionAdviceResponse)
+    async def get_decision_advice(
+        payload: DecisionAdviceRequest, request: Request
+    ) -> DecisionAdviceResponse:
+        service: TaskService = request.app.state.tasks
+        try:
+            return decision_advice(payload, resolve_results(payload, service))
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail="分析任务不存在，请重新计算") from exc
+        except TaskResultUnavailable as exc:
+            raise HTTPException(status_code=410 if exc.expired else 409, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     @application.post("/api/v1/ranges/preview", response_model=RangePreview)
     async def range_preview(payload: RangePreviewRequest) -> RangePreview:

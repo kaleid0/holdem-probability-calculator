@@ -32,6 +32,21 @@ export type LiveGame = {
   /** Legacy text prefix only. New records are stored in events. */
   log: string[];
 };
+function createHandId(): string {
+  if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  // LAN HTTP pages can use getRandomValues, but not randomUUID.
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0"));
+  return [
+    hex.slice(0, 4).join(""),
+    hex.slice(4, 6).join(""),
+    hex.slice(6, 8).join(""),
+    hex.slice(8, 10).join(""),
+    hex.slice(10).join(""),
+  ].join("-");
+}
 export function createGame(
   count = 3,
   dealer = 0,
@@ -40,7 +55,7 @@ export function createGame(
   stacks?: number[],
 ): LiveGame {
   return {
-    handId: crypto.randomUUID(),
+    handId: createHandId(),
     openingSeats: Array.from({ length: count }, (_, i) => i).filter(
       (i) => !stacks || stacks[i] > 0,
     ),
@@ -90,7 +105,7 @@ export function startGame(game: LiveGame): LiveGame {
       : pending.filter((i) => paid[i] < Math.max(...paid));
   return {
     ...game,
-    handId: game.handId ?? crypto.randomUUID(),
+    handId: game.handId ?? createHandId(),
     openingSeats: seated,
     paid,
     total: [...paid],

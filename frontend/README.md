@@ -37,6 +37,7 @@ Windows 已安装 Edge 时，浏览器测试前设置 `$env:PLAYWRIGHT_CHANNEL =
 - 快速分析自动运行，过时任务会取消；精细分析手动运行，保留旧结果并按提交输入判断是否过期。两者的任务 hooks 在切换面板时持续存在。
 - 更改 effect 依赖时检查任务提交、轮询和清理的生命周期。ESLint 将 Hooks 调用规则和依赖遗漏都视为错误。
 - `shared/cards` 提供公用选牌类型，其他组件不从应用入口反向导入类型。
+- 行动建议、权益门槛、候选 EV 和建议回退由后端 `/api/v1/decision-advice` 统一返回。`useDecisionAdvice` 仅负责请求、过期响应隔离、取消和重试；展示层不根据中文文案或权益重新决定动作。后端会读取分析任务并重放历史，详见 [职责边界](../docs/BACKEND_DECISIONS.md)。
 
 ## 接口与 CI
 

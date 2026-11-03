@@ -55,6 +55,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/decision-advice": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Get Decision Advice */
+        post: operations["get_decision_advice_api_v1_decision_advice_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/ranges/preview": {
         parameters: {
             query?: never;
@@ -209,6 +226,24 @@ export interface components {
             /** Showdown Equity */
             showdown_equity?: number | null;
         };
+        /** ActionEvComparison */
+        ActionEvComparison: {
+            /** Best */
+            best?: string[];
+            /**
+             * Model Version
+             * @default independent-response-v1
+             */
+            model_version: string;
+            /** Reason */
+            reason?: string | null;
+            /** Rows */
+            rows?: components["schemas"]["EvRow"][];
+            /** Scenarios */
+            scenarios?: components["schemas"]["EvScenario"][];
+            /** Stable */
+            stable?: string[];
+        };
         /** ActionEvent */
         ActionEvent: {
             /**
@@ -248,6 +283,36 @@ export interface components {
             toCall: number;
             /** Totalcommitted */
             totalCommitted: number;
+        };
+        /** AdviceAction */
+        AdviceAction: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "fold" | "check" | "call" | "bet" | "raise";
+            /**
+             * Amount
+             * @default 0
+             */
+            amount: number;
+            /**
+             * Amount Kind
+             * @default additional
+             * @enum {string}
+             */
+            amount_kind: "additional" | "street_total";
+        };
+        /** AdviceSources */
+        AdviceSources: {
+            /** Baseline */
+            baseline?: string | null;
+            /** History */
+            history?: string | null;
+            /** River */
+            river?: string | null;
+            /** Tree */
+            tree?: string | null;
         };
         /** AnalysisRequest */
         AnalysisRequest: {
@@ -373,6 +438,61 @@ export interface components {
             /** Win Probability */
             win_probability: number | null;
         };
+        /** DecisionAdvice */
+        DecisionAdvice: {
+            /** Actions */
+            actions?: components["schemas"]["AdviceAction"][];
+            /**
+             * Code
+             * @enum {string}
+             */
+            code: "recommendation" | "review" | "marginal" | "waiting" | "no-call" | "unavailable";
+            /** Model Version */
+            model_version: string;
+            /** Reason */
+            reason: string;
+            /** Reserve */
+            reserve?: number | null;
+            /** Source */
+            source: string;
+            /** Stability */
+            stability: string;
+            /** Threshold */
+            threshold?: number | null;
+            /** Title */
+            title: string;
+        };
+        /** DecisionAdviceRequest */
+        DecisionAdviceRequest: {
+            base_analysis: components["schemas"]["AnalysisRequest"];
+            history_context?: components["schemas"]["HistoryContext"] | null;
+            /** Opponent Seats */
+            opponent_seats?: number[];
+            /**
+             * Recorded
+             * @default false
+             */
+            recorded: boolean;
+            response_model?: components["schemas"]["ResponseModel"];
+            sources?: components["schemas"]["AdviceSources"];
+        };
+        /** DecisionAdviceResponse */
+        DecisionAdviceResponse: {
+            /** Advanced */
+            advanced: boolean;
+            advice: components["schemas"]["DecisionAdvice"] | null;
+            comparison: components["schemas"]["ActionEvComparison"];
+            fallback: components["schemas"]["DecisionAdvice"] | null;
+            /** Fallback Reasons */
+            fallback_reasons: string[];
+            /**
+             * Model Version
+             * @default decision-policy-v1
+             */
+            model_version: string;
+            opening_advice: components["schemas"]["DecisionAdvice"] | null;
+            response_model: components["schemas"]["ResponseModel"];
+        };
         /** EndEvent */
         EndEvent: {
             /**
@@ -396,6 +516,31 @@ export interface components {
             street: 0 | 3 | 4 | 5;
             /** Winner */
             winner: number | null;
+        };
+        /** EvRow */
+        EvRow: {
+            action: components["schemas"]["AdviceAction"];
+            /** Additional */
+            additional: number;
+            /** Errors */
+            errors: number[];
+            /** Label */
+            label: string;
+            /** Values */
+            values: number[];
+        };
+        /** EvScenario */
+        EvScenario: {
+            /** Equity */
+            equity: number;
+            /** Fold */
+            fold: number;
+            /** Name */
+            name: string;
+            /** Probe */
+            probe: number;
+            /** Raise */
+            raise: number;
         };
         /** ExactOpponent */
         ExactOpponent: {
@@ -581,6 +726,24 @@ export interface components {
             known_cards?: number[];
             /** Text */
             text: string;
+        };
+        /** ResponseModel */
+        ResponseModel: {
+            /**
+             * Fold
+             * @default 0.25
+             */
+            fold: number;
+            /**
+             * Probe
+             * @default 0.35
+             */
+            probe: number;
+            /**
+             * Raise
+             * @default 0.08
+             */
+            raise: number;
         };
         /** RiverScenarioSummary */
         RiverScenarioSummary: {
@@ -1011,6 +1174,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TaskSnapshot"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_decision_advice_api_v1_decision_advice_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionAdviceRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionAdviceResponse"];
                 };
             };
             /** @description Validation Error */

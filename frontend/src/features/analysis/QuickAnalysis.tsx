@@ -62,6 +62,12 @@ export default function QuickAnalysis({
           <p aria-label="建议可靠程度">{advice.stability}</p>
         </div>
       )}
+      {analysis.decision.error && (
+        <div role="status">
+          行动建议暂不可用：{analysis.decision.error}
+          <button onClick={analysis.decision.retry}>重试行动建议</button>
+        </div>
+      )}
     </section>
   );
 }

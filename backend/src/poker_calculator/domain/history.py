@@ -28,6 +28,9 @@ class ReplayState:
     total: tuple[int, ...]
     ended: bool
     minimum: int
+    paid: tuple[int, ...]
+    highest: int
+    acted_at: tuple[int | None, ...]
 
 
 def replay_state(
@@ -229,7 +232,17 @@ def replay_state(
     return (
         decisions,
         warnings,
-        ReplayState(actor, frozenset(pending), frozenset(active), tuple(total), ended, minimum),
+        ReplayState(
+            actor=actor,
+            pending=frozenset(pending),
+            active=frozenset(active),
+            total=tuple(total),
+            ended=ended,
+            minimum=minimum,
+            paid=tuple(paid),
+            highest=highest,
+            acted_at=tuple(acted.get(i) for i in range(h.count)),
+        ),
     )
 
 

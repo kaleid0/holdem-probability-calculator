@@ -1,5 +1,32 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, createGame, gameLog, nextStreet, startGame } from "./liveGame";
+
+describe("hand identifiers on LAN HTTP pages", () => {
+  const uuidV4 =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+
+  beforeEach(() => {
+    vi.stubGlobal("crypto", {
+      getRandomValues: crypto.getRandomValues.bind(crypto),
+    });
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("creates distinct UUIDs when randomUUID is unavailable", () => {
+    const first = createGame().handId;
+    const second = createGame().handId;
+    expect(first).toMatch(uuidV4);
+    expect(second).toMatch(uuidV4);
+    expect(first).not.toBe(second);
+  });
+
+  it("assigns an ID to a legacy game and preserves existing IDs", () => {
+    const game = createGame();
+    expect(startGame(game).handId).toBe(game.handId);
+    delete game.handId;
+    expect(startGame(game).handId).toMatch(uuidV4);
+  });
+});
 
 describe("live betting rounds", () => {
   it("posts blinds and preserves the big blind's option after calls", () => {

@@ -27,6 +27,12 @@ class QueueFullError(Exception):
     pass
 
 
+class TaskResultUnavailable(ValueError):
+    def __init__(self, *, expired: bool) -> None:
+        self.expired = expired
+        super().__init__("任务结果已过期，请重新计算" if expired else "分析任务尚未产生可用结果")
+
+
 @dataclass
 class Task:
     id: str
@@ -41,6 +47,7 @@ class Task:
     completion: Literal["complete", "partial", "none"] = "none"
     kind: Literal["analysis", "sensitivity"] = "analysis"
     sensitivity_result: SensitivityResult | None = None
+    analysis_request: AnalysisRequest | None = None
 
 
 class TaskService:
@@ -140,8 +147,19 @@ class TaskService:
         )
         task = Task(uuid.uuid4().hex, future, progress, cancellation)
         task.kind = "sensitivity" if sensitivity else "analysis"
+        if isinstance(request, AnalysisRequest):
+            task.analysis_request = request.model_copy(deep=True)
         self.tasks[task.id] = task
         return task
+
+    def completed_analysis(self, task_id: str) -> tuple[AnalysisRequest, AnalysisResult]:
+        snapshot = self.get(task_id)
+        task = self.tasks[task_id]
+        if snapshot.status != "succeeded" or snapshot.result is None:
+            raise TaskResultUnavailable(expired=snapshot.status == "expired")
+        if task.analysis_request is None:
+            raise ValueError("分析任务缺少原始输入，请重新计算")
+        return task.analysis_request, snapshot.result
 
     def get(self, task_id: str) -> TaskSnapshot:
         self._prune()
